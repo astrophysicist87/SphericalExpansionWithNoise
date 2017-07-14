@@ -24,7 +24,6 @@ void inline debugger(int cln, const char* cfn)
 	return;
 }
 
-
 int integration_mode = 1;
 bool include_baryon_chemical_potential_fluctations = true;
 extern const double hbarC;
@@ -32,8 +31,6 @@ extern const double mu_pion;
 extern const int n_xi_pts;
 extern const int n_k_pts;
 extern const int n_tau_pts;
-
-
 
 inline double norm_int(double x)
 {

@@ -1,13 +1,16 @@
 SHELL=/bin/sh
 
 SRCS= \
-SphericalHydroWithNoise.cpp \
+main.cpp \
 gauss_quadrature.cpp \
 lib.cpp
 
 HDRS= \
 gauss_quadrature.h \
 defs.h \
+defs1.h \
+defs2.h \
+emission_density.h \
 lib.h
 
 MAKEFILE=makefile
@@ -24,12 +27,8 @@ WARNFLAGS= -ansi -pedantic -Wall -W \
 LDFLAGS= -lgsl -lgslcblas 
 LIBS= -L/sw/lib -I/sw/include
 
- 
 $(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
 	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(LIBS)
-
-#process_event5.o : process_event5.cpp process_event5.h
-#	$(CC) $(CFLAGS) $(WARNFLAGS) $(LIBS) -c process_event5.cpp -o process_event5.o
 
 clean:
 	rm -f $(OBJS)

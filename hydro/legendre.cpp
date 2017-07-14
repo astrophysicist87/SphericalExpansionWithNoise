@@ -138,8 +138,10 @@ inline void mehler_fock_inverse_transform(double * u_pts, double (*f)(double), d
 	return (result);
 }
 
-void compute_legendre_integral(double ** array, double * k_pts_arr, int n_k_pts)
+void compute_legendre_integral(vector<vector<double> > array, vector<double> k_pts_arr)
 {
+	int n_k_pts = k_pts_arr.size();
+
 	//assume array has been properly defined elsewhere
 	double k1 = k_pts_arr[ik1];
 	double k2 = k_pts_arr[ik2];
@@ -169,8 +171,10 @@ void compute_legendre_integral(double ** array, double * k_pts_arr, int n_k_pts)
 	return;
 }
 
-void invert_2D_MFspace(double ** array, double * k_pts_arr, int n_k_pts)
+void invert_2D_MFspace(vector<vector<double> > array, vector<double> k_pts_arr)
 {
+	int n_k_pts = k_pts_arr.size();
+
 	//assume array has been properly defined elsewhere
 	double k1 = k_pts_arr[ik1];
 	double k2 = k_pts_arr[ik2];
@@ -196,6 +200,23 @@ void invert_2D_MFspace(double ** array, double * k_pts_arr, int n_k_pts)
 	}
 
 	gsl_integration_workspace_free (w);
+
+	return;
+}
+
+void set_Q_X_k(vector<vector<double> > result, vector<double> k_pts_arr, vector<double> u_pts_arr)
+{
+	int n_k_pts = k_pts_arr.size();
+	int n_u_pts = u_pts_arr.size();
+
+	for (int iu = 0; iu < n_u_pts; ++iu)
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	{
+		double u_loc = u_pts_arr[iu];
+		result[0][ik] = gsl_sf_conicalP_0(k_pts_arr[ik], u_pts_arr[iu]);
+		result[1][ik] = sqrt(u_loc*u_loc-1.0)*gsl_sf_conicalP_cyl_reg(1, k_pts_arr[ik], u_pts_arr[iu]);
+		result[2][ik] = result[0][ik];
+	}
 
 	return;
 }

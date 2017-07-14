@@ -53,7 +53,7 @@ void inline debugger(int cln, const char* cfn)
 
 inline double S_A(double xi)
 {
-	return ( exp( mT * ch_xi - muf) / Tf ) );
+	return ( exp( mT * cosh(xi) - muf) / Tf ) );
 }
 
 inline double S_B(double xi)
@@ -68,12 +68,6 @@ inline double S_B(double xi)
 
 	return ( a1*sh_z/z - a2*( sh_z - z*ch_z ) / (z*z) );
 }
-
-inline double S0(double xi)
-{
-	return ( S_A(xi)*S_B(xi) );
-}
-
 
 // need these next two functions for
 // taking derivatives of S_B
@@ -100,9 +94,10 @@ inline double S_B_b(double z, double a1, double a2)
 			);
 }
 
-vector<double> void set_first_derivatives_vector(double xi)
+vector<double> void set_SA_first_derivatives_vector(double u)
 {
-	double sh_xi = sinh(x), ch_xi = cosh(xi);
+	//double sh_xi = sinh(x), ch_xi = cosh(xi);
+	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 	vector<double> result;
 	result.push_back( (-muf + mT*ch_xi)/Tf2 );
 	result.push_back( -mT*sh_xi/Tf );
@@ -111,14 +106,15 @@ vector<double> void set_first_derivatives_vector(double xi)
 	return (result);
 }
 
-vector<vector<double> > void set_second_derivatives_array(double xi)
+vector<vector<double> > void set_SA_second_derivatives_array(double xi)
 {
 	vector<vector<double> > result;
 
 	double Tf2 = Tf*Tf;
 	double Tf3 = Tf2*Tf;
 	double Tf4 = Tf3*Tf;
-	double sh_xi = sinh(x), ch_xi = cosh(xi);
+	//double sh_xi = sinh(x), ch_xi = cosh(xi);
+	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 
 	vector<double> row1;
 	row1.push_back( ((muf - mT*ch_xi)*(muf + 2.0*Tf - mT*ch_xi))/Tf4 );
@@ -141,9 +137,84 @@ vector<vector<double> > void set_second_derivatives_array(double xi)
 	return (result);
 }
 
+vector<double> void set_SB_first_derivatives_vector(double u)
+{
+	//double sh_xi = sinh(x), ch_xi = cosh(xi);
+	double Tf2 = Tf*Tf;
+	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
+	double local_SBa = S_B_a(pT*sh_xi/Tf, mT*ch_xi, pT*sh_xi);
 
+	double dz_dv0 = -((pT*sh_xi)/Tf2);
+	double dz_dv1 = (pT*ch_xi)/Tf;
 
+	vector<double> result;
+	result.push_back( SBa*dz_dv0 );
+	result.push_back( SBa*dz_dv1 );
+	result.push_back( 0.0 );	//S_B is independent of delta mu
 
+	return (result);
+}
+
+vector<vector<double> > void set_SB_second_derivatives_array(double u)
+{
+	vector<vector<double> > result;
+
+	double Tf2 = Tf*Tf;
+	double Tf3 = Tf2*Tf;
+	double Tf4 = Tf3*Tf;
+	//double sh_xi = sinh(xi), ch_xi = cosh(xi);
+	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
+
+	double local_SBa = S_B_a(pT*sh_xi/Tf, mT*ch_xi, pT*sh_xi);
+	double local_SBb = S_B_b(pT*sh_xi/Tf, mT*ch_xi, pT*sh_xi);
+
+	double dz_dv0 = -((pT*sh_xi)/Tf2);
+	double dz_dv1 = (pT*ch_xi)/Tf;
+
+	double dz_dv0_dv0 = (2*pT*sh_xi)/Tf3;
+	double dz_dv0_dv1 = -((pT*ch_xi)/Tf2);
+	double dz_dv1_dv1 = (pT*sh_xi)/Tf`;
+
+	vector<double> row1;
+	row1.push_back( SBa*dz_dv0_dv0 + SBb*dz_dv0*dz_dv0 );
+	row1.push_back( SBa*dz_dv0_dv1 + SBb*dz_dv0*dz_dv1 );
+	row1.push_back( 0.0 );
+	result.push_back( row1 );
+
+	vector<double> row2;
+	row2.push_back( SBa*dz_dv0_dv1 + SBb*dz_dv0*dz_dv1 );
+	row2.push_back( SBa*dz_dv1_dv1 + SBb*dz_dv1*dz_dv1 );
+	row2.push_back( 0.0 );
+	result.push_back( row2 );
+
+	vector<double> row3;
+	row3.push_back( 0.0 );
+	row3.push_back( 0.0 );
+	row3.push_back( 0.0 );
+	result.push_back( row3 );
+
+	return (result);
+}
+
+inline double S0(double xi)
+{
+	return ( S_A(xi)*S_B(xi) );
+}
+
+inline double S_1_i(int iu, int iv)
+{
+	return ( dSA_dvi[iu][iv]*SB[iu] + dSB_dvi[iu][iv]*SA[iu] );
+}
+
+inline double S_2_ij(int iu, int iv1, int iv2)
+{
+	return (
+			dSA_dvi_dvj[iu][iv1][iv2] * SB[iu]
+			+ dSA_dvi[iu][iv1] * dSB_dvi[iu][iv2]
+			+ dSB_dvi[iu][iv1] * dSA_dvi[iu][iv2]
+			+ dSB_dvi_dvj[iu][iv1][iv2] * SA[iu]
+			);
+}
 
 
 

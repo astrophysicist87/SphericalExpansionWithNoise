@@ -5,10 +5,30 @@
 # include <iomanip>
 # include <ctime>
 # include <cstring>
+# include <vector>
 
 #include "gauss_quadrature.h"
 
 using namespace std;
+
+int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, vector<double> x_vec, vector<double> w_vec)
+{
+	double * x_pts = new double [order];
+	double * x_wts = new double [order];
+
+	gauss_quadrature(order, kind, alpha, beta, a, b, x_pts, x_wts);
+
+	x_vec.clear();
+	w_vec.clear();
+
+	for (int i = 0; i < order; ++i)
+	{
+		x_vec.push_back(x_pts[i]);
+		w_vec.push_back(x_wts[i]);
+	}
+
+	return (0);
+}
 
 int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]) 
 {

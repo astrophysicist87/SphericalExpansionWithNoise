@@ -52,7 +52,7 @@ inline double set_A1()
 	{
 		double T_loc = all_T_pts[it];
 		double mu_loc = all_mu_pts[it];
-		A1_pts[it] = (mu_loc/T_loc) + sPERn];
+		A1_pts[it] = (mu_loc/T_loc) + sPERn;
 	}
 	return;
 }
@@ -220,7 +220,7 @@ inline double F_2_13(int ik1, int ik2)
 // require further integrations)
 //////////////////////////////////////////////////////////////////
 
-inline void set_MFintegrand_delta_1_delta_1(double ** array)
+inline void set_MFintegrand_delta_1_delta_1(vector<vector<double> > array)
 {
 	double local_F_11_11 = F_11_11();
 	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
@@ -234,54 +234,54 @@ inline void set_MFintegrand_delta_1_delta_1(double ** array)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
 		array[ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + local_F_12_11[ik2]+ local_F_12_11[ik1] + F_22_11(ik1, ik2));
+							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
 	}
 	return;
 }
 
-inline void set_MFintegrand_delta_1_delta_2(double ** array)
+inline void set_MFintegrand_delta_1_delta_2(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_1_delta_3(double ** array)
+inline void set_MFintegrand_delta_1_delta_3(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_1_delta_1(double ** array)
+inline void set_MFintegrand_delta_1_delta_1(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_2_delta_2(double ** array)
+inline void set_MFintegrand_delta_2_delta_2(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_2_delta_3(double ** array)
+inline void set_MFintegrand_delta_2_delta_3(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_3_delta_1(double ** array)
+inline void set_MFintegrand_delta_3_delta_1(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_3_delta_2(double ** array)
+inline void set_MFintegrand_delta_3_delta_2(vector<vector<double> > array)
 {
 
 }
 
 
-inline void set_MFintegrand_delta_3_delta_3(double ** array)
+inline void set_MFintegrand_delta_3_delta_3(vector<vector<double> > array)
 {
 
 }

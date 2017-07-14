@@ -28,7 +28,7 @@ int integration_mode = 1;
 bool include_baryon_chemical_potential_fluctations = true;
 extern const double hbarC;
 extern const double mu_pion;
-extern const int n_xi_pts;
+extern const int n_u_pts;
 extern const int n_k_pts;
 extern const int n_tau_pts;
 
@@ -45,21 +45,24 @@ double current_kwt, current_DY;
 int current_itau;
 double mu_proton, mu_part;
 
-double * xi_pts_minf_inf, * xi_wts_minf_inf;
-double * k_pts, * k_wts;
-double * tau_pts, * tau_wts;
-double * tau_pts_lower, * tau_wts_lower;
-double * tau_pts_upper, * tau_wts_upper;
-double * T_pts, * mu_pts;
-double * T_pts_lower, * mu_pts_lower;
-double * T_pts_upper, * mu_pts_upper;
-double * all_T_pts, * all_mu_pts;
-double * Delta_lambda_pts, * vn2_pts, * vs2_pts, * vsigma2_pts, * n_Tmu_pts, * s_Tmu_pts, * w_Tmu_pts;
 
-//double G3_tau_taup[][][], tauDtau_G3_tau_taup[][][];
-//double A1pts[], A2pts[][][], Bpts[][][], Cpts[][][];
-double *** G3_tau_taup, *** tauDtau_G3_tau_taup, * transport_pts;
-double * A1pts, *** A2pts, *** Bpts, *** Cpts;
+vector<double> u_pts_minf_inf, u_wts_minf_inf;
+vector<double> k_pts, k_wts;
+vector<double> tau_pts, tau_wts;
+vector<double> tau_pts_lower, tau_wts_lower;
+vector<double> tau_pts_upper, tau_wts_upper;
+vector<double> T_pts, mu_pts;
+vector<double> T_pts_lower, mu_pts_lower;
+vector<double> T_pts_upper, mu_pts_upper;
+vector<double> all_T_pts, all_mu_pts;
+vector<double> Delta_lambda_pts, vn2_pts, vs2_pts, vsigma2_pts, n_Tmu_pts, s_Tmu_pts, w_Tmu_pts;
+
+vector<vector<vector<double> > > G3_tau_taup, tauDtau_G3_tau_taup;
+vector<double> transport_pts;
+vector<double> A1pts
+vector<vector<vector<double> > > A2pts, Bpts, Cpts;
+vector<vector<vector<double> > > dSA_dvi_dvj, dSB_dvi_dvj;
+vector<vector<double> > dSA_dvi, dSB_dvi;
 
 //general functions
 inline double Omega(double x)
@@ -584,6 +587,8 @@ inline void set_all_thermodynamic_points()
 		n_Tmu_pts[it] = n(local_T, local_mu);
 		s_Tmu_pts[it] = s(local_T, local_mu);
 		w_Tmu_pts[it] = w(local_T, local_mu);
+		double tmp = n_Tmu_pts[it] * local_T / ( s_Tmu_pts[it] * w_Tmu_pts[it] );
+		transport_pts[it] = Delta_lambda_pts[it] * tmp * tmp;
 	}
 	for (int it = n_tau_pts; it < 2*n_tau_pts; ++it)
 	{
@@ -599,6 +604,8 @@ inline void set_all_thermodynamic_points()
 		n_Tmu_pts[it] = n(local_T, local_mu);
 		s_Tmu_pts[it] = s(local_T, local_mu);
 		w_Tmu_pts[it] = w(local_T, local_mu);
+		double tmp = n_Tmu_pts[it] * local_T / ( s_Tmu_pts[it] * w_Tmu_pts[it] );
+		transport_pts[it] = Delta_lambda_pts[it] * tmp * tmp;
 	}
 	return;
 }
@@ -652,38 +659,38 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	vsigma2_at_tauf = vsigma2(Tf, muf);
 
     // set up grid points for integrations
-    xi_pts_minf_inf = new double [n_xi_pts];
-    tau_pts_lower = new double [n_tau_pts];
-    tau_pts_upper = new double [n_tau_pts];
-    tau_pts = new double [n_tau_pts];
-    k_pts = new double [n_k_pts];
-    xi_wts_minf_inf = new double [n_xi_pts];
-    tau_wts_lower = new double [n_tau_pts];
-    tau_wts_upper = new double [n_tau_pts];
-    tau_wts = new double [n_tau_pts];
-    k_wts = new double [n_k_pts];
-	x_pts = new double [n_x_pts];
-	x_wts = new double [n_x_pts];
+	u_pts_minf_inf = vector<double>(n_u_pts);
+    tau_pts_lower = vector<double>(n_tau_pts);
+    tau_pts_upper =vector<double>(n_tau_pts);
+    tau_pts = vector<double>(n_tau_pts);
+    k_pts = vector<double>(n_k_pts);
+    u_wts_minf_inf = vector<double>(n_u_pts);
+    tau_wts_lower = vector<double>(n_tau_pts);
+    tau_wts_upper = vector<double>(n_tau_pts);
+    tau_wts = vector<double>(n_tau_pts);
+    k_wts = vector<double>(n_k_pts);
+	x_pts = vector<double>(n_x_pts);
+	x_wts = vector<double>(n_x_pts);
 
-    int tmp = gauss_quadrature(n_xi_pts, 1, 0.0, 0.0, -xi_infinity, xi_infinity, xi_pts_minf_inf, xi_wts_minf_inf);
+    int tmp = gauss_quadrature(n_u_pts, 1, 0.0, 0.0, -u_infinity, u_infinity, u_pts_minf_inf, u_wts_minf_inf);
     tmp = gauss_quadrature(n_k_pts, 1, 0.0, 0.0, 0.0, k_infinity, k_pts, k_wts);
     tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, taui, tauf, tau_pts, tau_wts);
     tmp = gauss_quadrature(n_x_pts, 1, 0.0, 0.0, -1.0, 1.0, x_pts, x_wts);
 
-	T_pts_lower = new double [n_tau_pts];
-	T_pts_upper = new double [n_tau_pts];
-	T_pts = new double [n_tau_pts];
-	mu_pts_lower = new double [n_tau_pts];
-	mu_pts_upper = new double [n_tau_pts];
-	mu_pts = new double [n_tau_pts];
+	T_pts_lower = vector<double>(n_tau_pts);
+	T_pts_upper = vector<double>(n_tau_pts);
+	T_pts = vector<double>(n_tau_pts);
+	mu_pts_lower = vector<double>(n_tau_pts);
+	mu_pts_upper = vector<double>(n_tau_pts);
+	mu_pts = vector<double>(n_tau_pts);
 
-	Delta_lambda_pts = new double [2*n_tau_pts];
-	vn2_pts = new double [2*n_tau_pts];
-	vs2_pts = new double [2*n_tau_pts];
-	vsigma2_pts = new double [2*n_tau_pts];
-	n_Tmu_pts = new double [2*n_tau_pts];
-	s_Tmu_pts = new double [2*n_tau_pts];
-	w_Tmu_pts = new double [2*n_tau_pts];
+	Delta_lambda_pts = vector<double>(2*n_tau_pts);
+	vn2_pts = vector<double>(2*n_tau_pts);
+	vs2_pts = vector<double>(2*n_tau_pts);
+	vsigma2_pts = vector<double>(2*n_tau_pts);
+	n_Tmu_pts = vector<double>(2*n_tau_pts);
+	s_Tmu_pts = vector<double>(2*n_tau_pts);
+	w_Tmu_pts = vector<double>(2*n_tau_pts);
 
 	//computes tau-dependence of T and mu for remainder of calculation
 	populate_T_and_mu_vs_tau();
@@ -695,43 +702,21 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
     tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, tauc, tauf, tau_pts_upper, tau_wts_upper);
 	populate_T_and_mu_vs_tau_part2();
 
-	set_all_thermodynamic_points();
-
 	//allocate and initialize some other needed arrays
-	G3_tau_taup = new double ** [n_k_pts];
-	tauDtau_G3_tau_taup = new double ** [n_k_pts];
-	transport_pts = new double [2*n_tau_pts];
-	A1pts = new double [2*n_tau_pts];
-	A2pts = new double ** [n_k_pts];
-	Bpts = new double ** [n_k_pts];
-	Cpts = new double ** [n_k_pts];
-	//
-	for (int ik = 0; ik < n_k_pts; ++ik)
-	{
-		G3_tau_taup[ik] = new double * [2*n_tau_pts];
-		tauDtau_G3_tau_taup[ik] = new double * [2*n_tau_pts];
-		A2pts[ik] = new double * [2*n_tau_pts];
-		Bpts[ik] = new double * [2*n_tau_pts];
-		Cpts[ik] = new double * [2*n_tau_pts];
-		//
-		for (int it = 0; it < 2*n_tau_pts; ++it)
-		{
-			G3_tau_taup[ik][it] = new double [2*n_tau_pts];
-			tauDtau_G3_tau_taup[ik][it] = new double [2*n_tau_pts];
-			A2pts[ik][it] = new double [2*n_tau_pts];
-			Bpts[ik][it] = new double [2*n_tau_pts];
-			Cpts[ik][it] = new double [2*n_tau_pts];
-			//
-			for (int itp = 0; itp < 2*n_tau_pts; ++itp)
-			{
-				G3_tau_taup[ik][it][itp] = 0.0;
-				tauDtau_G3_tau_taup[ik][it][itp] = 0.0;
-				A2pts[ik][it][itp] = 0.0;
-				Bpts[ik][it][itp] = 0.0;
-				Cpts[ik][it][itp] = 0.0;
-			}
-		}
-	}
+	transport_pts = vector<double>(2*n_tau_pts);
+	A1pts = vector<double>(2*n_tau_pts);
+	create_matrix_3D(&A2pts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	create_matrix_3D(&Bpts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	create_matrix_3D(&Cpts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	create_matrix_3D(&G3_tau_taup, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	create_matrix_3D(&tauDtau_G3_tau_taup, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+
+	create_matrix_2D(&dSA_dvi, n_u_pts, 3);
+	create_matrix_2D(&dSB_dvi, n_u_pts, 3);
+	create_matrix_3D(&dSA_dvi_dvj, n_u_pts, 3, 3);
+	create_matrix_3D(&dSB_dvi_dvj, n_u_pts, 3, 3);
+
+	set_all_thermodynamic_points();
 
 	return;
 }

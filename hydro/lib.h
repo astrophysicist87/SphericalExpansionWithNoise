@@ -39,4 +39,7 @@ long binarySearch(double * A, int length, double value,
 				bool skip_out_of_range = true, bool verbose = false);
 void solve_cubic_equation(double b, double c, double d, complex<double> &r1, complex<double> &r2, complex<double> &r3);
 
+void create_matrix_2D( vector<vector<double> > * matrix_to_create, int dim1, int dim2);
+void create_matrix_3D( vector<vector<vector<double> > > * matrix_to_create, int dim1, int dim2, int dim3);
+
 #endif

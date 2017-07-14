@@ -362,5 +362,33 @@ long binarySearch(double * A, int length, double value, bool skip_out_of_range /
    return(idx_i);
 }
 
+void create_matrix_2D(
+	vector<vector<double> > * matrix_to_create,
+	int dim1, int dim2)
+{
+	for (int i = 0; i < dim1; ++i)
+	{
+		vector<double> tmp(dim2);
+		(*matrix_to_create).push_back( tmp );
+	}
+	return;
+}
+
+void create_matrix_3D(
+	vector<vector<vector<double> > > * matrix_to_create,
+	int dim1, int dim2, int dim3)
+{
+	for (int i = 0; i < dim1; ++i)
+	{
+		for (int j = 0; j < dim2; ++j)
+		{
+			vector<double> tmp(dim3);
+			(*matrix_to_create).push_back( tmp );
+		}
+	}
+	return;
+}
+
+
 
 //End of file
