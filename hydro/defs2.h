@@ -220,7 +220,7 @@ inline double F_2_13(int ik1, int ik2)
 // require further integrations)
 //////////////////////////////////////////////////////////////////
 
-inline void set_MFintegrand_delta_1_delta_1(vector<vector<double> > array)
+inline void set_T_11()
 {
 	double local_F_11_11 = F_11_11();
 	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
@@ -233,61 +233,31 @@ inline void set_MFintegrand_delta_1_delta_1(vector<vector<double> > array)
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		array[ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
 							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
 	}
 	return;
 }
 
-inline void set_MFintegrand_delta_1_delta_2(vector<vector<double> > array)
+
+
+
+
+inline double get_mean_delta_R2ij()
 {
-
+	double result = 0.0;
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	for (int iX = 0; iX < 3; ++iX)
+	for (int iY = 0; iY < 3; ++iY)
+	{
+		double k1 = k_pts[ik1];
+		double k2 = k_pts[ik2];
+		result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(pi*k1)*tanh(pi*k2)
+					*Tarray[iX][iY][ik1][ik2]*
+	}
+	return (result);
 }
-
-
-inline void set_MFintegrand_delta_1_delta_3(vector<vector<double> > array)
-{
-
-}
-
-
-inline void set_MFintegrand_delta_1_delta_1(vector<vector<double> > array)
-{
-
-}
-
-
-inline void set_MFintegrand_delta_2_delta_2(vector<vector<double> > array)
-{
-
-}
-
-
-inline void set_MFintegrand_delta_2_delta_3(vector<vector<double> > array)
-{
-
-}
-
-
-inline void set_MFintegrand_delta_3_delta_1(vector<vector<double> > array)
-{
-
-}
-
-
-inline void set_MFintegrand_delta_3_delta_2(vector<vector<double> > array)
-{
-
-}
-
-
-inline void set_MFintegrand_delta_3_delta_3(vector<vector<double> > array)
-{
-
-}
-
-
-
 
 
 //End of file

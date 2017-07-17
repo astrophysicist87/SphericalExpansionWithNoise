@@ -196,30 +196,70 @@ vector<vector<double> > void set_SB_second_derivatives_array(double u)
 	return (result);
 }
 
-inline double S0(double xi)
+inline void set_N0()
 {
-	return ( S_A(xi)*S_B(xi) );
+	N0 = 0.0;
+	for (int iu = 0; iu < n_u_pts; ++iu)
+		N0 += u_wts[iu] * S0x[iu];
 }
 
-inline double S_1_i(int iu, int iv)
+inline void set_int_wij_S0x_S0xp()
 {
-	return ( dSA_dvi[iu][iv]*SB[iu] + dSB_dvi[iu][iv]*SA[iu] );
+	double result = 0.0;
+	for (int iu = 0; iu < n_u_pts; ++iu)
+	for (int iup = 0; iup < n_u_pts; ++iup)
+		result += u_wts[iu] * bar_w_ij(iu, iup) * S0x[iu] * S0x[iup];
+	int_wij_S0x_S0xp = result;
 }
 
-inline double S_2_ij(int iu, int iv1, int iv2)
+inline void set_S0(int iu)
 {
-	return (
-			dSA_dvi_dvj[iu][iv1][iv2] * SB[iu]
-			+ dSA_dvi[iu][iv1] * dSB_dvi[iu][iv2]
-			+ dSB_dvi[iu][iv1] * dSA_dvi[iu][iv2]
-			+ dSB_dvi_dvj[iu][iv1][iv2] * SA[iu]
-			);
+	S0x[iu] = S_A[iu]*S_B[iu] );
+}
+
+inline void set_S_1_X(int iu, int iX)
+{
+	S1Xx[iX][iu] = dSA_dvi[iu][iX]*SB[iu] + dSB_dvi[iu][iX]*SA[iu];
+}
+
+inline void set_S_2_XY(int iu, int iX, int iY)
+{
+	S2XYx[iX][iY][iu] = 
+			dSA_dX_dY[iu][iX][iY] * SB[iu]
+			+ dSA_dX[iu][iX] * dSB_dvi[iu][iY]
+			+ dSB_dX[iu][iX] * dSA_dvi[iu][iY]
+			+ dSB_dX_dY[iu][iX][iY] * SA[iu]
+			;
+}
+
+inline void set_Q_X_k_x(int iX, int ik, int iu)
+{
+	QXkx[iX][ik][iu] = 
+}
+
+//smearing functions here
+inline void set_theta_0_XY(int iu, int iX, int iY)
+{
+	double result = 0.0;
+	for (int iup = 0; iup < n_u_pts; ++iup)
+	{
+		result += u_wts[iup] * bar_w_ij(iu, iup) * S0x[iup] * S2XYx[iX][iY][iu]
+	}
+	result -= int_wij_S0x_S0xp * S2XYx[iX][iY][iu] / N0;
+	theta0XY[iX][iY][iu] = result;
 }
 
 
+inline void set_theta_1_XY(int iu, int iup, int iX, int iY)
+{
+	double tmp1 = bar_w_ij(iu, iup) + 3.0 * int_wij_S0x_S0xp / (N0*N0);
+	
+	double tmp2 = 0.0;
+	for (int iupp = 0; iupp < n_u_pts; ++iupp)
+		tmp2 += u_wts[iupp] * bar_w_ij(iup, iupp) * S0x[iupp];
 
-
-
+	theta1XY[iX][iY][iu][iup] = S1Xx[iX][iu] * S1Xx[iY][iup] * ( tmp1 - 4.0 * tmp2 / N0 );
+}
 
 
 // End of file

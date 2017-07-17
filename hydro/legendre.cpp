@@ -204,7 +204,7 @@ void invert_2D_MFspace(vector<vector<double> > array, vector<double> k_pts_arr)
 	return;
 }
 
-void set_Q_X_k(vector<vector<double> > result, vector<double> k_pts_arr, vector<double> u_pts_arr)
+void set_Q_X_k(vector<vector<vector<double> > > result, vector<double> k_pts_arr, vector<double> u_pts_arr)
 {
 	int n_k_pts = k_pts_arr.size();
 	int n_u_pts = u_pts_arr.size();
@@ -213,9 +213,9 @@ void set_Q_X_k(vector<vector<double> > result, vector<double> k_pts_arr, vector<
 	for (int ik = 0; ik < n_k_pts; ++ik)
 	{
 		double u_loc = u_pts_arr[iu];
-		result[0][ik] = gsl_sf_conicalP_0(k_pts_arr[ik], u_pts_arr[iu]);
-		result[1][ik] = sqrt(u_loc*u_loc-1.0)*gsl_sf_conicalP_cyl_reg(1, k_pts_arr[ik], u_pts_arr[iu]);
-		result[2][ik] = result[0][ik];
+		result[0][ik][iu] = gsl_sf_conicalP_0(k_pts_arr[ik], u_pts_arr[iu]);
+		result[1][ik][iu] = sqrt(u_loc*u_loc-1.0)*gsl_sf_conicalP_cyl_reg(1, k_pts_arr[ik], u_pts_arr[iu]);
+		result[2][ik][iu] = result[0][ik][iu];
 	}
 
 	return;

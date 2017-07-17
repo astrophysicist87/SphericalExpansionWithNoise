@@ -45,7 +45,6 @@ double current_kwt, current_DY;
 int current_itau;
 double mu_proton, mu_part;
 
-
 vector<double> u_pts_minf_inf, u_wts_minf_inf;
 vector<double> k_pts, k_wts;
 vector<double> tau_pts, tau_wts;
@@ -59,7 +58,7 @@ vector<double> Delta_lambda_pts, vn2_pts, vs2_pts, vsigma2_pts, n_Tmu_pts, s_Tmu
 
 vector<vector<vector<double> > > G3_tau_taup, tauDtau_G3_tau_taup;
 vector<double> transport_pts;
-vector<double> A1pts
+vector<double> A1pts;
 vector<vector<vector<double> > > A2pts, Bpts, Cpts;
 vector<vector<vector<double> > > dSA_dvi_dvj, dSB_dvi_dvj;
 vector<vector<double> > dSA_dvi, dSB_dvi;
