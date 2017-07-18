@@ -232,11 +232,6 @@ inline void set_S_2_XY(int iu, int iX, int iY)
 			;
 }
 
-inline void set_Q_X_k_x(int iX, int ik, int iu)
-{
-	QXkx[iX][ik][iu] = 
-}
-
 //smearing functions here
 inline void set_theta_0_XY(int iu, int iX, int iY)
 {

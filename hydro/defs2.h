@@ -239,13 +239,137 @@ inline void set_T_11()
 	return;
 }
 
+inline void set_T_22()
+{
+	double local_F_11_11 = F_11_11();
+	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	{
+		local_F_12_11[ik] = F_12_11(ik);
+		local_F_21_11[ik] = F_21_11(ik);
+	}
+
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	{
+		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+	}
+	return;
+}
+
+inline void set_T_33()
+{
+	double local_F_11_11 = F_11_11();
+	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	{
+		local_F_12_11[ik] = F_12_11(ik);
+		local_F_21_11[ik] = F_21_11(ik);
+	}
+
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	{
+		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+	}
+	return;
+}
+
+inline void set_T_12()
+{
+	double local_F_11_11 = F_11_11();
+	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	{
+		local_F_12_11[ik] = F_12_11(ik);
+		local_F_21_11[ik] = F_21_11(ik);
+	}
+
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	{
+		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+	}
+	return;
+}
+
+inline void set_T_13()
+{
+	double local_F_11_11 = F_11_11();
+	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	{
+		local_F_12_11[ik] = F_12_11(ik);
+		local_F_21_11[ik] = F_21_11(ik);
+	}
+
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	{
+		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+	}
+	return;
+}
+
+inline void set_T_23()
+{
+	double local_F_11_11 = F_11_11();
+	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	{
+		local_F_12_11[ik] = F_12_11(ik);
+		local_F_21_11[ik] = F_21_11(ik);
+	}
+
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	{
+		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+	}
+	return;
+}
 
 
+inline void set_T_XY()
+{
+	//set diagonals
+	set_T_11();
+	set_T_22();
+	set_T_33();
+
+	//set off-diagonals
+	set_T_12();
+	set_T_13();
+	set_T_23();
+
+	//use symmetry to set the rest
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	{
+		Tarray[1][0][ik1][ik2] = Tarray[0][1][ik1][ik2];
+		Tarray[2][0][ik1][ik2] = Tarray[0][2][ik1][ik2];
+		Tarray[2][1][ik1][ik2] = Tarray[1][2][ik1][ik2];
+	}
+
+	return;
+}
 
 
 inline double get_mean_delta_R2ij()
 {
 	double result = 0.0;
+
+	//vector<vector<vector<double> > > QXk;
+
+	set_Q_X_k(QXk, k_pts, u_pts);
+
+	set_TXY();
+
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	for (int iX = 0; iX < 3; ++iX)
@@ -253,8 +377,19 @@ inline double get_mean_delta_R2ij()
 	{
 		double k1 = k_pts[ik1];
 		double k2 = k_pts[ik2];
-		result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(pi*k1)*tanh(pi*k2)
-					*Tarray[iX][iY][ik1][ik2]*
+		for (int iu = 0; iu < n_u_pts; ++iu)
+		{
+			result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(pi*k1)*tanh(pi*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
+						*theta0XY[iX][iY][iu];
+		}
+		for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
+		for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
+		{
+			result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(pi*k1)*tanh(pi*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+						*theta1XY[iX][iY][iu1][iu2];
+		}
 	}
 	return (result);
 }

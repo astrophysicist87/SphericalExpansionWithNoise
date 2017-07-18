@@ -389,6 +389,22 @@ void create_matrix_3D(
 	return;
 }
 
-
+void create_matrix_4D(
+	vector<vector<vector<vector<double> > > > * matrix_to_create,
+	int dim1, int dim2, int dim3, int dim4)
+{
+	for (int i = 0; i < dim1; ++i)
+	{
+		for (int j = 0; j < dim2; ++j)
+		{
+			for (int k = 0; k < dim3; ++k)
+			{
+				vector<double> tmp(dim4);
+				(*matrix_to_create).push_back( tmp );
+			}
+		}
+	}
+	return;
+}
 
 //End of file
