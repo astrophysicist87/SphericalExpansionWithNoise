@@ -12,16 +12,7 @@
 
 using namespace std;
 
-struct params1D
-{
-	double conjugate;	//u <--> k
-	double (*function)(double);
-};
-
-struct params2D
-{
-	double k1, k2;
-};
+#include "legendre.h"
 
 inline double gt_k1_gt_k2 (double x, void * params_ptr)
 {
@@ -43,7 +34,6 @@ inline double inverseMFkernel(double k, void * params_ptr)
 	params1D local_parameters = *(params1D *) (params_ptr);
 	double local_conjugate = local_parameters.conjugate;
 	return (k * tanh(M_PI * k) * gsl_sf_conicalP_0(k, local_conjugate) * (local_parameters.function)(k));
-}
 }
 
 inline double mehler_fock_transform(double k, double (*f)(double))
@@ -135,7 +125,7 @@ inline void mehler_fock_inverse_transform(double * u_pts, double (*f)(double), d
 
 	gsl_integration_workspace_free (w);
 
-	return (result);
+	return;
 }
 
 void compute_legendre_integral(vector<vector<double> > array, vector<double> k_pts_arr)
@@ -143,10 +133,8 @@ void compute_legendre_integral(vector<vector<double> > array, vector<double> k_p
 	int n_k_pts = k_pts_arr.size();
 
 	//assume array has been properly defined elsewhere
-	double k1 = k_pts_arr[ik1];
-	double k2 = k_pts_arr[ik2];
 	gsl_function F;
-	F.function = &f;	//should be gt_k1_gt_k2, I think
+	F.function = &gt_k1_gt_k2;	//should be gt_k1_gt_k2, I think
 
 	params2D my_params;
 
@@ -156,6 +144,8 @@ void compute_legendre_integral(vector<vector<double> > array, vector<double> k_p
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
 		double result, error;
+		double k1 = k_pts_arr[ik1];
+		double k2 = k_pts_arr[ik2];
 		my_params.k1 = k1;
 		my_params.k2 = k2;
 
@@ -176,10 +166,8 @@ void invert_2D_MFspace(vector<vector<double> > array, vector<double> k_pts_arr)
 	int n_k_pts = k_pts_arr.size();
 
 	//assume array has been properly defined elsewhere
-	double k1 = k_pts_arr[ik1];
-	double k2 = k_pts_arr[ik2];
 	gsl_function F;
-	F.function = &f;	//should be gt_k1_gt_k2, I think
+	F.function = &gt_k1_gt_k2;	//should be gt_k1_gt_k2, I think
 
 	params2D my_params;
 
@@ -189,6 +177,8 @@ void invert_2D_MFspace(vector<vector<double> > array, vector<double> k_pts_arr)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
 		double result, error;
+		double k1 = k_pts_arr[ik1];
+		double k2 = k_pts_arr[ik2];
 		my_params.k1 = k1;
 		my_params.k2 = k2;
 

@@ -43,25 +43,19 @@
 using namespace std;
 
 #include "lib.h"
-
-/*USAGE: debugger(__LINE__, __FILE__);*/
-void inline debugger(int cln, const char* cfn)
-{
-	cerr << "You made it to " << cfn << ":" << cln << "!" << endl;
-	return;
-}
+#include "defs1.h"
+#include "defs2.h"
 
 inline double S_A(double xi)
 {
 	double sh_xi = sinh(xi);
-	return ( sh_xi*sh_xi*exp( mT * cosh(xi) - muf) / Tf ) );
+	return ( sh_xi*sh_xi*exp( mT * cosh(xi) - muf) / Tf );
 }
 
 inline double S_B(double xi)
 {
-	double a1 = mT*ch_xi;
-	double sh_xi = sinh(xi);
-	double a2 = pT*sh_xi;
+	double ch_xi = cosh(xi), sh_xi = sinh(xi);
+	double a1 = mT*ch_xi, a2 = pT*sh_xi;
 
 	double z = pT*sh_xi/Tf;
 	double sh_z = sinh(z);
@@ -95,25 +89,26 @@ inline double S_B_b(double z, double a1, double a2)
 			);
 }
 
-vector<double> void set_SA_first_derivatives_vector(double u)
+void set_SA_first_derivatives_vector(int iu)
 {
+	double u = u_pts[iu];
+
 	//double sh_xi = sinh(x), ch_xi = cosh(xi);
 	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 	double prefactor = sh_xi*sh_xi*exp((muf - mT*u)/Tf);
 	double lambda = 1.0 + (muf - mT*u)/Tf;
 	double s_tilde = sf/Tf;
 
-	vector<double> result;
-	result.push_back( -prefactor*s_tilde*((lambda - 1.0)*chi_tilde_mu_mu + chi_tilde_T_mu) );
-	result.push_back( -prefactor*mT*sh_xi/Tf );
-	result.push_back( prefactor*s_tilde*((lambda - 1.0)*chi_tilde_T_mu + chi_tilde_T_T) );
+	dSA_dX[iu][0] = -prefactor*s_tilde*((lambda - 1.0)*chi_tilde_mu_mu + chi_tilde_T_mu);
+	dSA_dX[iu][1] = -prefactor*mT*sh_xi/Tf;
+	dSA_dX[iu][2] = prefactor*s_tilde*((lambda - 1.0)*chi_tilde_T_mu + chi_tilde_T_T);
 
-	return (result);
+	return;
 }
 
-vector<vector<double> > void set_SA_second_derivatives_array(double xi)
+void set_SA_second_derivatives_array(int iu)
 {
-	vector<vector<double> > result;
+	double u = u_pts[iu];
 
 	double Tf2 = Tf*Tf;
 	double Tf3 = Tf2*Tf;
@@ -123,39 +118,35 @@ vector<vector<double> > void set_SA_second_derivatives_array(double xi)
 	double prefactor = sh_xi*sh_xi*exp((muf - mT*u)/Tf);
 	double lambda = 1.0 + (muf - mT*u)/Tf;
 
-	vector<double> row1;
-	row1.push_back( prefactor*s_tilde*s_tilde*( (lambda*lambda-1.0)*chi_tilde_mu_mu*chi_tilde_mu_mu
+	dSA_dX_dY[iu][0][0] = prefactor*s_tilde*s_tilde*( (lambda*lambda-1.0)*chi_tilde_mu_mu*chi_tilde_mu_mu
 													+ 2.0*chi_tilde_mu_mu*chi_tilde_T_mu
-													+ chi_tilde_T_mu*chi_tilde_T_mu ) );
-	row1.push_back( prefactor*(mT/Tf)*s_tilde*sh_xi*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu) );
-	row1.push_back( -prefactor*s_tilde*s_tilde*(
+													+ chi_tilde_T_mu*chi_tilde_T_mu );
+	dSA_dX_dY[iu][0][1] = prefactor*(mT/Tf)*s_tilde*sh_xi*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu);
+	dSA_dX_dY[iu][0][2] = -prefactor*s_tilde*s_tilde*(
 						chi_tilde_T_mu*((lambda*lambda - 1.0)*chi_tilde_mu_mu + lambda*chi_tilde_T_mu)
-						 + chi_tidle_T_T*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu)
-					) );
-	result.push_back( row1 );
+						 + chi_tilde_T_T*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu)
+					);
 
-	vector<double> row2;
-	row2.push_back( prefactor*(mT/Tf)*s_tilde*sh_xi*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu) );
-	row2.push_back( prefactor*(mT/Tf)*((mT/Tf)*sh_xi*sh_xi-ch_xi) );
-	row2.push_back( -prefactor*(mT/Tf)*s_tilde*sh_xi(lambda*chi_tilde_T_mu+chi_tilde_T_T) );
-	result.push_back( row2 );
+	dSA_dX_dY[iu][1][0] = prefactor*(mT/Tf)*s_tilde*sh_xi*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu);
+	dSA_dX_dY[iu][1][1] = prefactor*(mT/Tf)*((mT/Tf)*sh_xi*sh_xi-ch_xi);
+	dSA_dX_dY[iu][1][2] = -prefactor*(mT/Tf)*s_tilde*sh_xi*(lambda*chi_tilde_T_mu+chi_tilde_T_T);
 
-	vector<double> row3;
-	row3.push_back( -prefactor*s_tilde*s_tilde*(
+	dSA_dX_dY[iu][2][0] = -prefactor*s_tilde*s_tilde*(
 						chi_tilde_T_mu*((lambda*lambda - 1.0)*chi_tilde_mu_mu + lambda*chi_tilde_T_mu)
-						 + chi_tidle_T_T*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu)
-					) );
-	row3.push_back( -prefactor*(mT/Tf)*s_tilde*sh_xi(lambda*chi_tilde_T_mu+chi_tilde_T_T) );
-	row3.push_back( prefactor*s_tilde*s_tilde*( (lambda*lambda-1.0)*chi_tilde_T_mu*chi_tilde_T_mu
+						 + chi_tilde_T_T*(lambda*chi_tilde_mu_mu+chi_tilde_T_mu)
+					);
+	dSA_dX_dY[iu][2][1] = -prefactor*(mT/Tf)*s_tilde*sh_xi*(lambda*chi_tilde_T_mu+chi_tilde_T_T);
+	dSA_dX_dY[iu][2][2] = prefactor*s_tilde*s_tilde*( (lambda*lambda-1.0)*chi_tilde_T_mu*chi_tilde_T_mu
 													+ 2.0*chi_tilde_T_mu*chi_tilde_T_T
-													+ chi_tilde_T_T*chi_tilde_T_T ) );
-	result.push_back( row3 );
+													+ chi_tilde_T_T*chi_tilde_T_T );
 
-	return (result);
+	return;
 }
 
-vector<double> void set_SB_first_derivatives_vector(double u)
+void set_SB_first_derivatives_vector(int iu)
 {
+	double u = u_pts[iu];
+
 	//double sh_xi = sinh(x), ch_xi = cosh(xi);
 	double Tf2 = Tf*Tf;
 	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
@@ -168,22 +159,20 @@ vector<double> void set_SB_first_derivatives_vector(double u)
 	double dz_dv1 = kappa_C;
 	double dz_dv2 = s_tilde*kappa_S*chi_tilde_T_mu;
 
-	vector<double> result;
-	result.push_back( SBa*dz_dv0 );
-	result.push_back( SBa*dz_dv1 );
-	result.push_back( SBa*dz_dv2 );
+	dSB_dX[iu][0] = local_SBa*dz_dv0;
+	dSB_dX[iu][1] = local_SBa*dz_dv1;
+	dSB_dX[iu][2] = local_SBa*dz_dv2;
 
-	return (result);
+	return ;
 }
 
-vector<vector<double> > void set_SB_second_derivatives_array(double u)
+void set_SB_second_derivatives_array(int iu)
 {
-	vector<vector<double> > result;
-
 	double Tf2 = Tf*Tf;
 	double Tf3 = Tf2*Tf;
 	double Tf4 = Tf3*Tf;
 	//double sh_xi = sinh(xi), ch_xi = cosh(xi);
+	double u = u_pts[iu];
 	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 
 	double z_loc = pT*sh_xi/Tf;
@@ -205,25 +194,19 @@ vector<vector<double> > void set_SB_second_derivatives_array(double u)
 	double dz_dv2_dv1 = dz_dv1_dv2;
 	double dz_dv2_dv2 = 2.0*s_tilde*s_tilde*kappa_S*chi_tilde_T_mu*chi_tilde_T_mu;
 
-	vector<double> row1;
-	row1.push_back( SBa*dz_dv0_dv0 + SBb*dz_dv0*dz_dv0 );
-	row1.push_back( SBa*dz_dv0_dv1 + SBb*dz_dv0*dz_dv1 );
-	row1.push_back( SBa*dz_dv0_dv2 + SBb*dz_dv0*dz_dv2 );
-	result.push_back( row1 );
+	dSB_dX_dY[iu][0][0] = local_SBa*dz_dv0_dv0 + local_SBb*dz_dv0*dz_dv0;
+	dSB_dX_dY[iu][0][1] = local_SBa*dz_dv0_dv1 + local_SBb*dz_dv0*dz_dv1;
+	dSB_dX_dY[iu][0][2] = local_SBa*dz_dv0_dv2 + local_SBb*dz_dv0*dz_dv2;
 
-	vector<double> row2;
-	row2.push_back( SBa*dz_dv1_dv0 + SBb*dz_dv1*dz_dv0 );
-	row2.push_back( SBa*dz_dv1_dv1 + SBb*dz_dv1*dz_dv1 );
-	row2.push_back( SBa*dz_dv1_dv2 + SBb*dz_dv1*dz_dv2 );
-	result.push_back( row2 );
+	dSB_dX_dY[iu][1][0] = local_SBa*dz_dv1_dv0 + local_SBb*dz_dv1*dz_dv0;
+	dSB_dX_dY[iu][1][1] = local_SBa*dz_dv1_dv1 + local_SBb*dz_dv1*dz_dv1;
+	dSB_dX_dY[iu][1][2] = local_SBa*dz_dv1_dv2 + local_SBb*dz_dv1*dz_dv2;
 
-	vector<double> row3;
-	row3.push_back( SBa*dz_dv2_dv0 + SBb*dz_dv2*dz_dv0 );
-	row3.push_back( SBa*dz_dv2_dv1 + SBb*dz_dv2*dz_dv1 );
-	row3.push_back( SBa*dz_dv2_dv2 + SBb*dz_dv2*dz_dv2 );
-	result.push_back( row3 );
+	dSB_dX_dY[iu][2][0] = local_SBa*dz_dv2_dv0 + local_SBb*dz_dv2*dz_dv0;
+	dSB_dX_dY[iu][2][1] = local_SBa*dz_dv2_dv1 + local_SBb*dz_dv2*dz_dv1;
+	dSB_dX_dY[iu][2][2] = local_SBa*dz_dv2_dv2 + local_SBb*dz_dv2*dz_dv2;
 
-	return (result);
+	return;
 }
 
 inline void set_N0()
@@ -244,20 +227,20 @@ inline void set_int_wij_S0x_S0xp()
 
 inline void set_S0(int iu)
 {
-	S0x[iu] = S_A[iu]*S_B[iu] );
+	S0x[iu] = SA[iu]*SB[iu];
 }
 
 inline void set_S_1_X(int iu, int iX)
 {
-	S1Xx[iX][iu] = dSA_dvi[iu][iX]*SB[iu] + dSB_dvi[iu][iX]*SA[iu];
+	S1Xx[iX][iu] = dSA_dX[iu][iX]*SB[iu] + dSB_dX[iu][iX]*SA[iu];
 }
 
 inline void set_S_2_XY(int iu, int iX, int iY)
 {
 	S2XYx[iX][iY][iu] = 
 			dSA_dX_dY[iu][iX][iY] * SB[iu]
-			+ dSA_dX[iu][iX] * dSB_dvi[iu][iY]
-			+ dSB_dX[iu][iX] * dSA_dvi[iu][iY]
+			+ dSA_dX[iu][iX] * dSB_dX[iu][iY]
+			+ dSB_dX[iu][iX] * dSA_dX[iu][iY]
 			+ dSB_dX_dY[iu][iX][iY] * SA[iu]
 			;
 }
@@ -268,7 +251,7 @@ inline void set_theta_0_XY(int iu, int iX, int iY)
 	double result = 0.0;
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
-		result += u_wts[iup] * bar_w_ij(iu, iup) * S0x[iup] * S2XYx[iX][iY][iu]
+		result += u_wts[iup] * bar_w_ij(iu, iup) * S0x[iup] * S2XYx[iX][iY][iu];
 	}
 	result -= int_wij_S0x_S0xp * S2XYx[iX][iY][iu] / N0;
 	theta0XY[iX][iY][iu] = result;

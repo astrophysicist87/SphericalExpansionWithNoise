@@ -16,6 +16,7 @@
 using namespace std;
 
 #include "lib.h"
+#include "gauss_quadrature.h"
 
 /*USAGE: debugger(__LINE__, __FILE__);*/
 void inline debugger(int cln, const char* cfn)
@@ -30,24 +31,35 @@ extern const double hbarC;
 extern const double mu_pion;
 extern const int n_u_pts;
 extern const int n_k_pts;
+extern const int n_x_pts;
 extern const int n_tau_pts;
 
-double vs, Neff, tauf, taui, Tf, Ti, nu, nuVB, ds, m, sf, s_at_mu_part;
+extern const double u_infinity, k_infinity;
+
+double vs, Neff, tauf, Tf, Ti, nu, nuVB, ds, m, sf, s_at_mu_part;
 double mByT, alpha0, psi0;
 double chi_tilde_mu_mu, chi_tilde_T_mu, chi_tilde_T_T, Delta;
 
 double exp_delta, exp_gamma, exp_nu;
 double T0, mu0, Tc, Pc, nc, sc, wc, muc;
 double A0, A2, A4, C0, B, mui, muf, xi0, xibar0, etaBYs, RD, sPERn, Nf, qD, si, ni;
-double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf;
+double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf, mT, pT, tau0, s_tilde, kappa_S, kappa_C;
 
 double current_kwt, current_DY;
 int current_itau;
 double mu_proton, mu_part;
+extern double tau0;
+extern int itf;
 
-vector<double> u_pts_minf_inf, u_wts_minf_inf;
+extern double muis[];
+
+double N0, int_wij_S0x_S0xp;
+
+vector<double> u_pts, u_wts;
 vector<double> k_pts, k_wts;
+vector<double> x_pts, x_wts;
 vector<double> tau_pts, tau_wts;
+vector<double> all_tau_pts, all_tau_wts;
 vector<double> tau_pts_lower, tau_wts_lower;
 vector<double> tau_pts_upper, tau_wts_upper;
 vector<double> T_pts, mu_pts;
@@ -56,12 +68,29 @@ vector<double> T_pts_upper, mu_pts_upper;
 vector<double> all_T_pts, all_mu_pts;
 vector<double> Delta_lambda_pts, vn2_pts, vs2_pts, vsigma2_pts, n_Tmu_pts, s_Tmu_pts, w_Tmu_pts;
 
-vector<vector<vector<double> > > G3_tau_taup, tauDtau_G3_tau_taup;
+vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
 vector<double> transport_pts;
-vector<double> A1pts;
-vector<vector<vector<double> > > A2pts, Bpts, Cpts;
-vector<vector<vector<double> > > dSA_dvi_dvj, dSB_dvi_dvj;
-vector<vector<double> > dSA_dvi, dSB_dvi;
+vector<double> A1_pts;
+vector<vector<vector<complex<double> > > > A2_pts;
+vector<vector<complex<double> > > B_pts, C_pts;
+
+vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
+vector<vector<complex<double> > > F_2_12_pts, F_2_13_pts;
+
+vector<vector<vector<vector<complex<double> > > > > Tarray;
+vector<vector<vector<double> > > dSA_dX_dY, dSB_dX_dY;
+vector<vector<double> > dSA_dX, dSB_dX;
+vector<double> SA, SB;
+vector<vector<double> > legendre_integral_array;
+vector<double> S0x;
+vector<vector<double> > S1Xx;
+vector<vector<vector<double> > > S2XYx;
+vector<vector<vector<double> > > theta0XY;
+vector<vector<vector<vector<double> > > > theta1XY;
+
+vector<vector<vector<double> > > QXk;
+
+double bar_w_ij(int iu, int iup);
 
 //general functions
 inline double Omega(double x)
@@ -114,12 +143,12 @@ inline void set_phase_diagram_and_EOS_parameters()
 
 inline double guess_T(double tau)
 {
-	return (Ti * pow(taui / tau, 1.0/3.0));
+	return (Ti * pow(tau0 / tau, 1.0/3.0));
 }
 
 inline double guess_mu(double tau)
 {
-	return (mui * pow(taui / tau, 1.0/3.0));
+	return (mui * pow(tau0 / tau, 1.0/3.0));
 }
 
 ///////////////////////////////////////////////////////////
@@ -127,12 +156,12 @@ inline double guess_mu(double tau)
 ///////////////////////////////////////////////////////////
 inline double s(double tau)
 {
-	return (si * taui / tau);
+	return (si * tau0 / tau);
 }
 
 inline double n(double tau)
 {
-	return (ni * taui / tau);
+	return (ni * tau0 / tau);
 }
 
 inline double s(double T, double mu)
@@ -315,7 +344,7 @@ void compute_Tf_and_muf()
 	size_t i, iter = 0;
 
 	const size_t n = 2;
-	struct rparams p = {taui};
+	struct rparams p = {tau0};
 	gsl_multiroot_function f = {&input_get_Tf_and_muf_f, n, &p};
 
 	double x_init[2] = {Ti, mui};
@@ -538,14 +567,14 @@ void populate_T_and_mu_vs_tau_part2()
 //a miscellaneous function to help split up tau integral
 void break_up_integral(int nt, double &max_DL, double &tauc, double &width)
 {
-	double Delta_t = (tauf - taui - 1.0) / (double)nt;
+	double Delta_t = (tauf - tau0 - 1.0) / (double)nt;
 	vector<double> Delta_lambda_vec;
 	vector<double> tpts;
 
 	//check Delta_lambda
 	for (int it = 1; it < nt; ++it)
 	{
-		double t_loc = taui + 0.5 + (double)it * Delta_t;
+		double t_loc = tau0 + 0.5 + (double)it * Delta_t;
 		double T_loc = interpolate1D(tau_pts, T_pts, t_loc, n_tau_pts, 1, false);
 		double mu_loc = interpolate1D(tau_pts, mu_pts, t_loc, n_tau_pts, 1, false);
 		double DL = Delta_lambda(T_loc, mu_loc);
@@ -609,6 +638,61 @@ inline void set_all_thermodynamic_points()
 	return;
 }
 
+/*template <typename T>
+void create_matrix_2D(
+	vector<vector<T> > * matrix_to_create,
+	int dim1, int dim2)
+{
+	for (int i = 0; i < dim1; ++i)
+	{
+		vector<T> tmp(dim2);
+		(*matrix_to_create).push_back( tmp );
+	}
+	return;
+}
+
+template <typename T>
+void create_matrix_3D(
+	vector<vector<vector<T> > > * matrix_to_create,
+	int dim1, int dim2, int dim3)
+{
+	for (int i = 0; i < dim1; ++i)
+	{
+		vector<vector<T> > tmp2(dim2);
+		for (int j = 0; j < dim2; ++j)
+		{
+			vector<T> tmp3(dim3);
+			tmp2.push_back( tmp3 );
+		}
+		(*matrix_to_create).push_back( tmp2 );
+	}
+	return;
+}
+
+template <typename T>
+void create_matrix_4D(
+	vector<vector<vector<vector<T> > > > * matrix_to_create,
+	int dim1, int dim2, int dim3, int dim4)
+{
+	for (int i = 0; i < dim1; ++i)
+	{
+		vector<vector<vector<T> > > tmp2(dim2);
+		for (int j = 0; j < dim2; ++j)
+		{
+			vector<vector<T> > tmp3(dim3);
+			for (int k = 0; k < dim3; ++k)
+			{
+				vector<T> tmp4(dim4);
+				tmp3.push_back( tmp4 );
+			}
+			tmp2.push_back( tmp3 );
+		}
+		(*matrix_to_create).push_back( tmp2 );
+	}
+	return;
+}*/
+
+
 inline void initialize_all(int chosen_trajectory, int particle_to_study)
 {
 	mui = muis[chosen_trajectory];
@@ -618,7 +702,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 
 	//other constants
 	m = (particle_to_study == 1) ? 139.57 / hbarC : 939.0 / hbarC;
-	taui = 0.5;		//fm/c
+	tau0 = 0.5;		//fm/c
 
 	si = s(Ti, mui);
 	ni = n(Ti, mui);
@@ -627,7 +711,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	compute_Tf_and_muf();
 
 	sf = s(Tf, muf);
-	tauf = si * taui / sf;
+	tauf = si * tau0 / sf;
 
 	set_critical_point_parameters();
 
@@ -652,18 +736,18 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	chi_tilde_T_T = chi_T_T / Delta;
 
 	//set parameters for FTd-Green's functions
-	a_at_tauf = alpha(Tf, muf);
+	//a_at_tauf = alpha(Tf, muf);
 	vs2_at_tauf = vs2(Tf, muf);
 	vn2_at_tauf = vn2(Tf, muf);
 	vsigma2_at_tauf = vsigma2(Tf, muf);
 
     // set up grid points for integrations
-	u_pts_minf_inf = vector<double>(n_u_pts);
+	u_pts = vector<double>(n_u_pts);
     tau_pts_lower = vector<double>(n_tau_pts);
     tau_pts_upper =vector<double>(n_tau_pts);
     tau_pts = vector<double>(n_tau_pts);
     k_pts = vector<double>(n_k_pts);
-    u_wts_minf_inf = vector<double>(n_u_pts);
+    u_wts = vector<double>(n_u_pts);
     tau_wts_lower = vector<double>(n_tau_pts);
     tau_wts_upper = vector<double>(n_tau_pts);
     tau_wts = vector<double>(n_tau_pts);
@@ -671,9 +755,9 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	x_pts = vector<double>(n_x_pts);
 	x_wts = vector<double>(n_x_pts);
 
-    int tmp = gauss_quadrature(n_u_pts, 1, 0.0, 0.0, -u_infinity, u_infinity, u_pts_minf_inf, u_wts_minf_inf);
+    int tmp = gauss_quadrature(n_u_pts, 1, 0.0, 0.0, -u_infinity, u_infinity, u_pts, u_wts);
     tmp = gauss_quadrature(n_k_pts, 1, 0.0, 0.0, 0.0, k_infinity, k_pts, k_wts);
-    tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, taui, tauf, tau_pts, tau_wts);
+    tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, tau0, tauf, tau_pts, tau_wts);
     tmp = gauss_quadrature(n_x_pts, 1, 0.0, 0.0, -1.0, 1.0, x_pts, x_wts);
 
 	T_pts_lower = vector<double>(n_tau_pts);
@@ -697,23 +781,43 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	int nt = 1000000;
 	double max_DL, tauc, width;
 	break_up_integral(nt, max_DL, tauc, width);
-    tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, taui, tauc, tau_pts_lower, tau_wts_lower);
+    tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, tau0, tauc, tau_pts_lower, tau_wts_lower);
     tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, tauc, tauf, tau_pts_upper, tau_wts_upper);
 	populate_T_and_mu_vs_tau_part2();
 
 	//allocate and initialize some other needed arrays
 	transport_pts = vector<double>(2*n_tau_pts);
-	A1pts = vector<double>(2*n_tau_pts);
-	create_matrix_3D(&A2pts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
-	create_matrix_3D(&Bpts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
-	create_matrix_3D(&Cpts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	A1_pts = vector<double>(2*n_tau_pts);
+
+	create_matrix_2D(&legendre_integral_array, n_k_pts, n_k_pts);
+
+	create_matrix_3D(&A2_pts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	create_matrix_2D(&B_pts, n_k_pts, 2*n_tau_pts);
+	create_matrix_2D(&C_pts, n_k_pts, 2*n_tau_pts);
 	create_matrix_3D(&G3_tau_taup, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
 	create_matrix_3D(&tauDtau_G3_tau_taup, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
 
-	create_matrix_2D(&dSA_dvi, n_u_pts, 3);
-	create_matrix_2D(&dSB_dvi, n_u_pts, 3);
-	create_matrix_3D(&dSA_dvi_dvj, n_u_pts, 3, 3);
-	create_matrix_3D(&dSB_dvi_dvj, n_u_pts, 3, 3);
+	F_1_12_pts = vector<complex<double> >(n_k_pts);
+	F_1_13_pts = vector<complex<double> >(n_k_pts);
+	F_12_11_pts = vector<complex<double> >(n_k_pts);
+	F_21_11_pts = vector<complex<double> >(n_k_pts);
+	create_matrix_2D(&F_2_12_pts, n_k_pts, n_k_pts);
+	create_matrix_2D(&F_2_13_pts, n_k_pts, n_k_pts);
+
+	SA = vector<double>(n_u_pts);
+	SB = vector<double>(n_u_pts);
+	create_matrix_2D(&dSA_dX, n_u_pts, 3);
+	create_matrix_2D(&dSA_dX, n_u_pts, 3);
+	create_matrix_2D(&dSB_dX, n_u_pts, 3);
+	create_matrix_3D(&dSA_dX_dY, n_u_pts, 3, 3);
+	create_matrix_3D(&dSB_dX_dY, n_u_pts, 3, 3);
+
+	create_matrix_3D(&theta0XY, 3, 3, n_u_pts);
+	create_matrix_4D(&theta1XY, 3, 3, n_u_pts, n_u_pts);
+
+
+	create_matrix_3D(&QXk, 3, n_k_pts, n_u_pts);
+	create_matrix_4D(&Tarray, 3, 3, n_k_pts, n_k_pts);
 
 	set_all_thermodynamic_points();
 

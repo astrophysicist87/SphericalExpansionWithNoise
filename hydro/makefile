@@ -3,19 +3,20 @@ SHELL=/bin/sh
 SRCS= \
 main.cpp \
 gauss_quadrature.cpp \
-lib.cpp
+lib.cpp \
+legendre.cpp
 
 HDRS= \
 gauss_quadrature.h \
-defs.h \
 defs1.h \
 defs2.h \
 emission_density.h \
-lib.h
+lib.h \
+legendre.h
 
 MAKEFILE=makefile
 
-COMMAND=HNC
+COMMAND=run.e
 
 OBJS= $(addsuffix .o, $(basename $(SRCS)))
 

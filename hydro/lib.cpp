@@ -96,26 +96,27 @@ double integrate_2D(double (*f)(double, double), double Lx, double Ly, int nx, i
 }*/
 
 // some interpolation routines here
-double interpolate1D(double * x, double * y, double x0, long size, int kind, bool uniform_spacing, bool returnflag /*= false*/, double default_return_value /* = 0*/)
+double interpolate1D(vector<double> x, vector<double> y, double x0, int kind, bool uniform_spacing, bool returnflag /*= false*/, double default_return_value /* = 0*/)
 {
 // kind == 0: linear interpolation
 // kind == 1: cubic interpolation
+	long size = x.size();
 	switch (kind)
 	{
 		case 0:
 		{
 			if (uniform_spacing)
-				return interpLinearDirect(x, y, x0, size, returnflag, default_return_value);
+				return interpLinearDirect(x, y, x0, returnflag, default_return_value);
 			else
-				return interpLinearNondirect(x, y, x0, size, returnflag, default_return_value);
+				return interpLinearNondirect(x, y, x0, returnflag, default_return_value);
 			break;
 		}
 		case 1:
 		{
 			if (uniform_spacing)
-				return interpCubicDirect(x, y, x0, size, returnflag, default_return_value);
+				return interpCubicDirect(x, y, x0, returnflag, default_return_value);
 			else
-				return interpCubicNonDirect(x, y, x0, size, returnflag, default_return_value);
+				return interpCubicNonDirect(x, y, x0, returnflag, default_return_value);
 			break;
 		}
 		default:
@@ -129,11 +130,12 @@ double interpolate1D(double * x, double * y, double x0, long size, int kind, boo
 }
 
 //**********************************************************************
-double interpLinearDirect(double * x, double * y, double x0, long size, bool returnflag /*= false*/, double default_return_value /* = 0*/)
+double interpLinearDirect(vector<double> x, vector<double> y, double x0, bool returnflag /*= false*/, double default_return_value /* = 0*/)
 // Returns the interpreted value of y=y(x) at x=x0 using linear interpolation method.
 // -- x,y: the independent and dependent tables; x is assumed to be equal spaced and increasing
 // -- x0: where the interpolation should be performed
 {
+	long size = x.size();
 	if (size==1) {cout<<"interpLinearDirect warning: table size = 1"<<endl; return y[0];}
 	double dx = x[1]-x[0]; // increment in x
 
@@ -163,11 +165,12 @@ double interpLinearDirect(double * x, double * y, double x0, long size, bool ret
 }
 
 //**********************************************************************
-double interpLinearNondirect(double * x, double * y, double x0, long size, bool returnflag /*= false*/, double default_return_value /* = 0*/)
+double interpLinearNondirect(vector<double> x, vector<double> y, double x0, bool returnflag /*= false*/, double default_return_value /* = 0*/)
 // Returns the interpreted value of y=y(x) at x=x0 using linear interpolation method.
 // -- x,y: the independent and dependent tables; x is assumed to be increasing but not equal spaced
 // -- x0: where the interpolation should be performed
 {
+	long size = x.size();
 	if (size==1) {cout<<"interpLinearNondirect warning: table size = 1"<<endl; return y[0];}
 	double dx = x[1]-x[0]; // increment in x
 
@@ -196,11 +199,12 @@ double interpLinearNondirect(double * x, double * y, double x0, long size, bool 
 }
 
 //**********************************************************************
-double interpCubicDirect(double * x, double * y, double x0, long size, bool returnflag /*= false*/, double default_return_value /* = 0*/)
+double interpCubicDirect(vector<double> x, vector<double> y, double x0, bool returnflag /*= false*/, double default_return_value /* = 0*/)
 // Returns the interpreted value of y=y(x) at x=x0 using cubic polynomial interpolation method.
 // -- x,y: the independent and dependent tables; x is assumed to be equal spaced and increasing
 // -- x0: where the interpolation should be performed
 {
+	long size = x.size();
   if (size==1) {cout<<"interpCubicDirect warning: table size = 1"; return y[0];}
   double dx = x[1]-x[0]; // increment in x
 
@@ -252,11 +256,12 @@ double interpCubicDirect(double * x, double * y, double x0, long size, bool retu
 }
 
 //**********************************************************************
-double interpCubicNonDirect(double * x, double * y, double xi, long size, bool returnflag /*= false*/, double default_return_value /* = 0*/)
+double interpCubicNonDirect(vector<double> x, vector<double> y, double xi, bool returnflag /*= false*/, double default_return_value /* = 0*/)
 // Returns the interpreted value of y=y(x) at x=x0 using cubic polynomial interpolation method.
 // -- x,y: the independent and dependent double x0ables; x is *NOT* assumed to be equal spaced but it has to be increasing
 // -- xi: where the interpolation should be performed
 {
+	long size = x.size();
   if (size==1) {cout<<"interpCubicNondirect warning: table size = 1"<<endl; return y[0];}
 
   // if close to left end:
@@ -328,12 +333,13 @@ double interpCubicNonDirect(double * x, double * y, double xi, long size, bool r
 }
 
 //**********************************************************************
-long binarySearch(double * A, int length, double value, bool skip_out_of_range /*== true*/, bool verbose /*== false*/)
+long binarySearch(vector<double> A, double value, bool skip_out_of_range /*== true*/, bool verbose /*== false*/)
 // Return the index of the largest number less than value in the list A
 // using binary search. Index starts with 0.
 // If skip_out_of_range is set to true, then it will return -1 for those
 // samples that are out of the table range (default is true).
 {
+   int length = A.size();
    int idx_i, idx_f, idx;
    idx_i = 0;
    idx_f = length-1;
@@ -360,51 +366,6 @@ long binarySearch(double * A, int length, double value, bool skip_out_of_range /
      idx = (int) floor((idx_f+idx_i)/2.);
    }
    return(idx_i);
-}
-
-void create_matrix_2D(
-	vector<vector<double> > * matrix_to_create,
-	int dim1, int dim2)
-{
-	for (int i = 0; i < dim1; ++i)
-	{
-		vector<double> tmp(dim2);
-		(*matrix_to_create).push_back( tmp );
-	}
-	return;
-}
-
-void create_matrix_3D(
-	vector<vector<vector<double> > > * matrix_to_create,
-	int dim1, int dim2, int dim3)
-{
-	for (int i = 0; i < dim1; ++i)
-	{
-		for (int j = 0; j < dim2; ++j)
-		{
-			vector<double> tmp(dim3);
-			(*matrix_to_create).push_back( tmp );
-		}
-	}
-	return;
-}
-
-void create_matrix_4D(
-	vector<vector<vector<vector<double> > > > * matrix_to_create,
-	int dim1, int dim2, int dim3, int dim4)
-{
-	for (int i = 0; i < dim1; ++i)
-	{
-		for (int j = 0; j < dim2; ++j)
-		{
-			for (int k = 0; k < dim3; ++k)
-			{
-				vector<double> tmp(dim4);
-				(*matrix_to_create).push_back( tmp );
-			}
-		}
-	}
-	return;
 }
 
 //End of file
