@@ -46,7 +46,7 @@ inline void set_G3_and_tauDtau_G3_matrices()
 	return;
 }
 
-inline double set_A1()
+inline void set_A1_pts()
 {
 	for (int it = 0; it < 2*n_tau_pts; ++it)
 	{
@@ -57,7 +57,7 @@ inline double set_A1()
 	return;
 }
 
-inline double A2(int ik, int it, int itp)
+inline void set_A2_pts()
 {
 	for (int ik = 0; ik < n_k_pts; ++ik)
 	for (int it = 0; it < 2*n_tau_pts; ++it)
@@ -75,7 +75,7 @@ inline double A2(int ik, int it, int itp)
 	return;
 }
 
-inline double B(int ik, int it, int itp)
+inline void set_B_pts()
 {
 	for (int ik = 0; ik < n_k_pts; ++ik)
 	for (int it = 0; it < 2*n_tau_pts; ++it)
@@ -84,7 +84,7 @@ inline double B(int ik, int it, int itp)
 	return;
 }
 
-inline double C(int ik, int it, int itp)
+inline void set_C_pts()
 {
 	for (int ik = 0; ik < n_k_pts; ++ik)
 	for (int it = 0; it < 2*n_tau_pts; ++it)
@@ -241,95 +241,92 @@ inline void set_T_11()
 
 inline void set_T_22()
 {
-	double local_F_11_11 = F_11_11();
-	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
-	for (int ik = 0; ik < n_k_pts; ++ik)
-	{
-		local_F_12_11[ik] = F_12_11(ik);
-		local_F_21_11[ik] = F_21_11(ik);
-	}
+	set_B_pts();
 
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+		double tmp = 0.0;
+		for (int itp = 0; itp < 2*n_tau_pts; ++itp)
+		{
+			double taup = all_tau_pts[itp];
+			tmp += tauf*tauf*legendre_integral_array[ik1][ik2]
+							* transport_pts[itp] * B_pts[ik1][itp] * B_pts[ik2][itp] / (2.0*M_PI*pow(taup,5.0));	//only one time-index since first one evaluated at tau_f
+		}
+		Tarray[1][1][ik1][ik2] = tmp;
 	}
 	return;
 }
 
 inline void set_T_33()
 {
-	double local_F_11_11 = F_11_11();
-	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
-	for (int ik = 0; ik < n_k_pts; ++ik)
-	{
-		local_F_12_11[ik] = F_12_11(ik);
-		local_F_21_11[ik] = F_21_11(ik);
-	}
+	set_C_pts();
 
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+		double tmp = 0.0;
+		for (int itp = 0; itp < 2*n_tau_pts; ++itp)
+		{
+			double taup = all_tau_pts[itp];
+			tmp += tauf*tauf*legendre_integral_array[ik1][ik2]
+							* transport_pts[itp] * C_pts[ik1][itp] * C_pts[ik2][itp] / (2.0*M_PI*taup*taup);	//only one time-index since first one evaluated at tau_f
+		}
+		Tarray[2][2][ik1][ik2] = tmp;
 	}
 	return;
 }
 
 inline void set_T_12()
 {
-	double local_F_11_11 = F_11_11();
-	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	vector<double> local_F_1_12[n_k_pts], local_F_2_12[n_k_pts][n_k_pts];
+
 	for (int ik = 0; ik < n_k_pts; ++ik)
-	{
-		local_F_12_11[ik] = F_12_11(ik);
-		local_F_21_11[ik] = F_21_11(ik);
-	}
+		local_F_1_12[ik] = F_1_12(ik);
 
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+		local_F_2_12[ik1][ik2] = F_2_12(ik1,ik2);
+		Tarray[0][1][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_1_12[ik2] + local_F_2_12[ik1][ik2]) / (2.0*M_PI);
 	}
 	return;
 }
 
 inline void set_T_13()
 {
-	double local_F_11_11 = F_11_11();
-	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
+	vector<double> local_F_1_13[n_k_pts], local_F_2_13[n_k_pts][n_k_pts];
+
 	for (int ik = 0; ik < n_k_pts; ++ik)
-	{
-		local_F_12_11[ik] = F_12_11(ik);
-		local_F_21_11[ik] = F_21_11(ik);
-	}
+		local_F_1_13[ik] = F_1_13(ik);
 
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+		local_F_2_13[ik1][ik2] = F_2_13(ik1,ik2);
+		Tarray[0][2][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
+							* (local_F_1_13[ik2] + local_F_2_13[ik1][ik2]) / (2.0*M_PI);
 	}
 	return;
 }
 
 inline void set_T_23()
 {
-	double local_F_11_11 = F_11_11();
-	double local_F_12_11[n_k_pts], local_F_21_11[n_k_pts];
-	for (int ik = 0; ik < n_k_pts; ++ik)
-	{
-		local_F_12_11[ik] = F_12_11(ik);
-		local_F_21_11[ik] = F_21_11(ik);
-	}
+	set_B_pts();
+	set_C_pts();
 
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + local_F_12_11[ik2] + local_F_12_11[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+		double tmp = 0.0;
+		for (int itp = 0; itp < 2*n_tau_pts; ++itp)
+		{
+			double taup = all_tau_pts[itp];
+			tmp += tauf*tauf*legendre_integral_array[ik1][ik2]
+							* transport_pts[itp] * B_pts[ik1][itp] * C_pts[ik2][itp] / (2.0*M_PI*pow(taup,5.0));	//only one time-index since first one evaluated at tau_f
+		}
+		Tarray[1][2][ik1][ik2] = tmp;
 	}
 	return;
 }
@@ -391,7 +388,8 @@ inline double get_mean_delta_R2ij()
 						*theta1XY[iX][iY][iu1][iu2];
 		}
 	}
-	return (result);
+
+	return (result / (N0*N0));
 }
 
 
