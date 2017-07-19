@@ -69,6 +69,7 @@ vector<double> all_T_pts, all_mu_pts;
 vector<double> Delta_lambda_pts, vn2_pts, vs2_pts, vsigma2_pts, n_Tmu_pts, s_Tmu_pts, w_Tmu_pts;
 
 vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
+vector<vector<complex<double> > > G3_tauf_taup, tauDtau_G3_tauf_taup;
 vector<double> transport_pts;
 vector<double> A1_pts;
 vector<vector<vector<complex<double> > > > A2_pts;
@@ -638,61 +639,6 @@ inline void set_all_thermodynamic_points()
 	return;
 }
 
-/*template <typename T>
-void create_matrix_2D(
-	vector<vector<T> > * matrix_to_create,
-	int dim1, int dim2)
-{
-	for (int i = 0; i < dim1; ++i)
-	{
-		vector<T> tmp(dim2);
-		(*matrix_to_create).push_back( tmp );
-	}
-	return;
-}
-
-template <typename T>
-void create_matrix_3D(
-	vector<vector<vector<T> > > * matrix_to_create,
-	int dim1, int dim2, int dim3)
-{
-	for (int i = 0; i < dim1; ++i)
-	{
-		vector<vector<T> > tmp2(dim2);
-		for (int j = 0; j < dim2; ++j)
-		{
-			vector<T> tmp3(dim3);
-			tmp2.push_back( tmp3 );
-		}
-		(*matrix_to_create).push_back( tmp2 );
-	}
-	return;
-}
-
-template <typename T>
-void create_matrix_4D(
-	vector<vector<vector<vector<T> > > > * matrix_to_create,
-	int dim1, int dim2, int dim3, int dim4)
-{
-	for (int i = 0; i < dim1; ++i)
-	{
-		vector<vector<vector<T> > > tmp2(dim2);
-		for (int j = 0; j < dim2; ++j)
-		{
-			vector<vector<T> > tmp3(dim3);
-			for (int k = 0; k < dim3; ++k)
-			{
-				vector<T> tmp4(dim4);
-				tmp3.push_back( tmp4 );
-			}
-			tmp2.push_back( tmp3 );
-		}
-		(*matrix_to_create).push_back( tmp2 );
-	}
-	return;
-}*/
-
-
 inline void initialize_all(int chosen_trajectory, int particle_to_study)
 {
 	mui = muis[chosen_trajectory];
@@ -794,6 +740,8 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	create_matrix_3D(&A2_pts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
 	create_matrix_2D(&B_pts, n_k_pts, 2*n_tau_pts);
 	create_matrix_2D(&C_pts, n_k_pts, 2*n_tau_pts);
+	create_matrix_2D(&G3_tauf_taup, n_k_pts, 2*n_tau_pts);
+	create_matrix_2D(&tauDtau_G3_tauf_taup, n_k_pts, 2*n_tau_pts);
 	create_matrix_3D(&G3_tau_taup, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
 	create_matrix_3D(&tauDtau_G3_tau_taup, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
 

@@ -69,6 +69,32 @@ inline void set_G3_and_tauDtau_G3_matrices()
 	return;
 }
 
+inline void set_G3_and_tauDtau_G3_matrices_at_tauf()
+{
+	for (int ik = 0; ik < n_k_pts; ++ik)
+	for (int itp = 0; itp < 2*n_tau_pts; ++itp)
+	{
+		vector<complex<double> > roots;
+		complex<double> zeta0;
+		double k = k_pts[ik];
+		double taup = all_tau_pts[itp];
+
+		get_roots(tauf, k, roots, zeta0);	//assumes coefficients are evaluated at tau, not tau'
+
+		complex<double> r1 = roots[0];
+		complex<double> r2 = roots[1];
+		complex<double> r3 = roots[2];
+		complex<double> a1 = (r2*r3 + zeta0) * pow(tauf/taup, r1) / ((r1-r2)*(r1-r3));
+		complex<double> a2 = (r3*r1 + zeta0) * pow(tauf/taup, r2) / ((r2-r3)*(r2-r1));
+		complex<double> a3 = (r1*r2 + zeta0) * pow(tauf/taup, r3) / ((r3-r1)*(r3-r2));
+
+		G3_tauf_taup[ik][itp] = a1 + a2 + a3;
+
+		tauDtau_G3_tauf_taup[ik][itp] = r1*a1 + r2*a2 + r3*a3;
+	}
+	return;
+}
+
 inline void set_A1_pts()
 {
 	for (int it = 0; it < 2*n_tau_pts; ++it)
@@ -100,7 +126,7 @@ inline void set_B_pts()
 {
 	for (int ik = 0; ik < n_k_pts; ++ik)
 	for (int itp = 0; itp < 2*n_tau_pts; ++itp)
-		B_pts[ik][itp] = sPERn * tauDtau_G3_tau_taup[ik][itf][itp];
+		B_pts[ik][itp] = sPERn * tauDtau_G3_tauf_taup[ik][itp];
 	return;
 }
 
@@ -108,7 +134,7 @@ inline void set_C_pts()
 {
 	for (int ik = 0; ik < n_k_pts; ++ik)
 	for (int itp = 0; itp < 2*n_tau_pts; ++itp)
-		C_pts[ik][itp] = G3_tau_taup[ik][itf][itp];
+		C_pts[ik][itp] = G3_tauf_taup[ik][itp];
 	return;
 }
 
