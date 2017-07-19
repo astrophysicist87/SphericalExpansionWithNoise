@@ -100,7 +100,6 @@ double interpolate1D(vector<double> x, vector<double> y, double x0, int kind, bo
 {
 // kind == 0: linear interpolation
 // kind == 1: cubic interpolation
-	long size = x.size();
 	switch (kind)
 	{
 		case 0:
@@ -178,7 +177,7 @@ double interpLinearNondirect(vector<double> x, vector<double> y, double x0, bool
 	if (abs(x0-x[0])<dx*1e-30) return y[0];
 
 	// find x's integer index
-	long idx = binarySearch(x, size, x0, true);
+	long idx = binarySearch(x, x0, true);
 	if (idx<0 || idx>=size-1)
 	{
 		if (!returnflag)	//i.e., if returnflag is false, exit
@@ -268,14 +267,14 @@ double interpCubicNonDirect(vector<double> x, vector<double> y, double xi, bool 
   if (abs(xi-x[0])<(x[1]-x[0])*1e-30) return y[0];
 
   // find x's integer index
-  long idx = binarySearch(x, size, xi, true);
+  long idx = binarySearch(x, xi, true);
 
 	if (idx < 0 || idx >= size-1)
 	{
 		if (!returnflag)	//i.e., if returnflag is false, exit
 		{
 			cerr << "interpCubicNonDirect(): index out of range!  Aborting!" << endl
-				<< "interpCubicNonDirect(): size = " << size << ", x0 = " << xi << ", " << "idx=" << idx << endl;
+				<< "interpCubicNonDirect(): size = " << size << ", x0 = " << xi << ", " << "idx=" << idx << " of (" << x[0] << ", " << y[0] << ") to (" << x[size-1] << ", " << y[size-1] << ")" << endl;
 			exit(1);
 		}
 		else

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, vector<double> x_vec, vector<double> w_vec);
+int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, vector<double> & x_vec, vector<double> & w_vec);
 int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
 int gauss_quadrature_standard(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);
 int scale_gausspoints(int order, int kind, double alpha, double beta, double a, double b, double x[], double w[]);

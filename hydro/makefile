@@ -21,7 +21,7 @@ COMMAND=run.e
 OBJS= $(addsuffix .o, $(basename $(SRCS)))
 
 CC= g++
-CFLAGS=  -pg
+CFLAGS=  -pg -g
 WARNFLAGS= -ansi -pedantic -Wall -W \
    -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
    -Wwrite-strings -fshort-enums -fno-common 
@@ -29,7 +29,7 @@ LDFLAGS= -lgsl -lgslcblas
 LIBS= -L/sw/lib -I/sw/include
 
 $(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
-	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(LIBS)
+	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(CFLAGS) $(LIBS)
 
 clean:
 	rm -f $(OBJS)

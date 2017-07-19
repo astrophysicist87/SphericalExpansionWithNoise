@@ -11,7 +11,7 @@
 
 using namespace std;
 
-int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, vector<double> x_vec, vector<double> w_vec)
+int gauss_quadrature(int order, int kind, double alpha, double beta, double a, double b, vector<double> & x_vec, vector<double> & w_vec)
 {
 	double * x_pts = new double [order];
 	double * x_wts = new double [order];
@@ -26,6 +26,9 @@ int gauss_quadrature(int order, int kind, double alpha, double beta, double a, d
 		x_vec.push_back(x_pts[i]);
 		w_vec.push_back(x_wts[i]);
 	}
+
+	delete [] x_pts;
+	delete [] x_wts;
 
 	return (0);
 }

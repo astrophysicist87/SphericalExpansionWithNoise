@@ -49,7 +49,6 @@ double current_kwt, current_DY;
 int current_itau;
 double mu_proton, mu_part;
 extern double tau0;
-extern int itf;
 
 extern double muis[];
 
@@ -576,8 +575,8 @@ void break_up_integral(int nt, double &max_DL, double &tauc, double &width)
 	for (int it = 1; it < nt; ++it)
 	{
 		double t_loc = tau0 + 0.5 + (double)it * Delta_t;
-		double T_loc = interpolate1D(tau_pts, T_pts, t_loc, n_tau_pts, 1, false);
-		double mu_loc = interpolate1D(tau_pts, mu_pts, t_loc, n_tau_pts, 1, false);
+		double T_loc = interpolate1D(tau_pts, T_pts, t_loc, 1, false);
+		double mu_loc = interpolate1D(tau_pts, mu_pts, t_loc, 1, false);
 		double DL = Delta_lambda(T_loc, mu_loc);
 		Delta_lambda_vec.push_back(DL);
 		tpts.push_back(t_loc);
@@ -596,7 +595,7 @@ void break_up_integral(int nt, double &max_DL, double &tauc, double &width)
 	}
 	width = sqrt(width / den);
 	
-	//cout << max_DL << "   " << tauc << "   " << width << endl;
+	cout << max_DL << "   " << tauc << "   " << width << endl;
 	return;
 }
 
@@ -606,6 +605,8 @@ inline void set_all_thermodynamic_points()
 	{
 		double local_T = T_pts_lower[it];
 		double local_mu = mu_pts_lower[it];
+		all_tau_pts[it] = tau_pts_lower[it];
+		all_tau_wts[it] = tau_wts_lower[it];
 		all_T_pts[it] = local_T;
 		all_mu_pts[it] = local_mu;		
 
@@ -621,8 +622,10 @@ inline void set_all_thermodynamic_points()
 	}
 	for (int it = n_tau_pts; it < 2*n_tau_pts; ++it)
 	{
-		double local_T = T_pts_upper[it];
-		double local_mu = mu_pts_upper[it];
+		double local_T = T_pts_upper[it-n_tau_pts];
+		double local_mu = mu_pts_upper[it-n_tau_pts];
+		all_tau_pts[it] = tau_pts_upper[it-n_tau_pts];
+		all_tau_wts[it] = tau_wts_upper[it-n_tau_pts];
 		all_T_pts[it] = local_T;
 		all_mu_pts[it] = local_mu;		
 		
@@ -701,7 +704,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	x_pts = vector<double>(n_x_pts);
 	x_wts = vector<double>(n_x_pts);
 
-    int tmp = gauss_quadrature(n_u_pts, 1, 0.0, 0.0, -u_infinity, u_infinity, u_pts, u_wts);
+    int tmp = gauss_quadrature(n_u_pts, 1, 0.0, 0.0, 1.0, u_infinity, u_pts, u_wts);
     tmp = gauss_quadrature(n_k_pts, 1, 0.0, 0.0, 0.0, k_infinity, k_pts, k_wts);
     tmp = gauss_quadrature(n_tau_pts, 1, 0.0, 0.0, tau0, tauf, tau_pts, tau_wts);
     tmp = gauss_quadrature(n_x_pts, 1, 0.0, 0.0, -1.0, 1.0, x_pts, x_wts);
@@ -713,6 +716,10 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	mu_pts_upper = vector<double>(n_tau_pts);
 	mu_pts = vector<double>(n_tau_pts);
 
+	all_tau_pts = vector<double>(2*n_tau_pts);
+	all_tau_wts = vector<double>(2*n_tau_pts);
+	all_T_pts = vector<double>(2*n_tau_pts);
+	all_mu_pts = vector<double>(2*n_tau_pts);
 	Delta_lambda_pts = vector<double>(2*n_tau_pts);
 	vn2_pts = vector<double>(2*n_tau_pts);
 	vs2_pts = vector<double>(2*n_tau_pts);

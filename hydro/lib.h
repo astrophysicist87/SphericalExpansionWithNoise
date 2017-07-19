@@ -42,12 +42,25 @@ void solve_cubic_equation(double b, double c, double d, complex<double> &r1, com
 template <typename T>
 void create_matrix_2D(
 	vector<vector<T> > * matrix_to_create,
-	int dim1, int dim2)
+	int dim1, int dim2, bool verbose = false)
 {
-	for (int i = 0; i < dim1; ++i)
+	/*for (int i = 0; i < dim1; ++i)
 	{
 		vector<T> tmp(dim2);
 		(*matrix_to_create).push_back( tmp );
+	}*/
+	(*matrix_to_create) = vector<vector<T> > (dim1);
+	for (int i = 0; i < dim1; ++i)
+	{
+		(*matrix_to_create)[i] = vector<T> (dim2);
+		for (int j = 0; j < dim2; ++j)
+			(*matrix_to_create)[i][j] = T(0.0);
+	}
+	if (verbose)
+	{
+		cout << "create_matrix_2D():" << endl;
+		cout << dim1 << "   " << (*matrix_to_create).size() << endl;
+		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;
 	}
 	return;
 }
@@ -55,9 +68,9 @@ void create_matrix_2D(
 template <typename T>
 void create_matrix_3D(
 	vector<vector<vector<T> > > * matrix_to_create,
-	int dim1, int dim2, int dim3)
+	int dim1, int dim2, int dim3, bool verbose = false)
 {
-	for (int i = 0; i < dim1; ++i)
+	/*for (int i = 0; i < dim1; ++i)
 	{
 		vector<vector<T> > tmp2(dim2);
 		for (int j = 0; j < dim2; ++j)
@@ -66,6 +79,24 @@ void create_matrix_3D(
 			tmp2.push_back( tmp3 );
 		}
 		(*matrix_to_create).push_back( tmp2 );
+	}*/
+	(*matrix_to_create) = vector<vector<vector<T> > > (dim1);
+	for (int i = 0; i < dim1; ++i)
+	{
+		(*matrix_to_create)[i] = vector<vector<T> > (dim2);
+		for (int j = 0; j < dim2; ++j)
+		{
+			(*matrix_to_create)[i][j] = vector<T> (dim3);
+			for (int k = 0; k < dim3; ++k)
+				(*matrix_to_create)[i][j][k] = T(0.0);
+		}
+	}
+	if (verbose)
+	{
+		cout << "create_matrix_3D():" << endl;
+		cout << dim1 << "   " << (*matrix_to_create).size() << endl;
+		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;
+		cout << dim3 << "   " << (*matrix_to_create)[0][0].size() << endl;
 	}
 	return;
 }
@@ -73,9 +104,9 @@ void create_matrix_3D(
 template <typename T>
 void create_matrix_4D(
 	vector<vector<vector<vector<T> > > > * matrix_to_create,
-	int dim1, int dim2, int dim3, int dim4)
+	int dim1, int dim2, int dim3, int dim4, bool verbose = false)
 {
-	for (int i = 0; i < dim1; ++i)
+	/*for (int i = 0; i < dim1; ++i)
 	{
 		vector<vector<vector<T> > > tmp2(dim2);
 		for (int j = 0; j < dim2; ++j)
@@ -89,6 +120,29 @@ void create_matrix_4D(
 			tmp2.push_back( tmp3 );
 		}
 		(*matrix_to_create).push_back( tmp2 );
+	}*/
+	(*matrix_to_create) = vector<vector<vector<vector<T> > > > (dim1);
+	for (int i = 0; i < dim1; ++i)
+	{
+		(*matrix_to_create)[i] = vector<vector<vector<T> > > (dim2);
+		for (int j = 0; j < dim2; ++j)
+		{
+			(*matrix_to_create)[i][j] = vector<vector<T> > (dim3);
+			for (int k = 0; k < dim3; ++k)
+			{
+				(*matrix_to_create)[i][j][k] = vector<T> (dim4);
+				for (int l = 0; l < dim4; ++l)
+					(*matrix_to_create)[i][j][k][l] = T(0.0);
+			}
+		}
+	}
+	if (verbose)
+	{
+		cout << "create_matrix_4D():" << endl;
+		cout << dim1 << "   " << (*matrix_to_create).size() << endl;
+		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;
+		cout << dim3 << "   " << (*matrix_to_create)[0][0].size() << endl;
+		cout << dim3 << "   " << (*matrix_to_create)[0][0][0].size() << endl;
 	}
 	return;
 }
