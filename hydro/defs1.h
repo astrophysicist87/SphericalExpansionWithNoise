@@ -18,7 +18,9 @@ using namespace std;
 #include "lib.h"
 #include "gauss_quadrature.h"
 
-/*USAGE: debugger(__LINE__, __FILE__);*/
+/* USAGE:
+debugger(__LINE__, __FILE__);
+*/
 void inline debugger(int cln, const char* cfn)
 {
 	cerr << "You made it to " << cfn << ":" << cln << "!" << endl;
@@ -43,7 +45,9 @@ double chi_tilde_mu_mu, chi_tilde_T_mu, chi_tilde_T_T, Delta;
 double exp_delta, exp_gamma, exp_nu;
 double T0, mu0, Tc, Pc, nc, sc, wc, muc;
 double A0, A2, A4, C0, B, mui, muf, xi0, xibar0, etaBYs, RD, sPERn, Nf, qD, si, ni;
-double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf, mT, pT, tau0, s_tilde, kappa_S, kappa_C;
+double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf, tau0, s_tilde, kappa_S, kappa_C;
+
+extern double mT, pT;
 
 double current_kwt, current_DY;
 int current_itau;
@@ -71,11 +75,12 @@ vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
 vector<vector<complex<double> > > G3_tauf_taup, tauDtau_G3_tauf_taup;
 vector<double> transport_pts;
 vector<double> A1_pts;
-vector<vector<vector<complex<double> > > > A2_pts;
+//vector<vector<vector<complex<double> > > > A2_pts;
+vector<complex<double> > A2_pts;
 vector<vector<complex<double> > > B_pts, C_pts;
 
 vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
-vector<vector<complex<double> > > F_2_12_pts, F_2_13_pts;
+vector<vector<complex<double> > > F_22_11_pts, F_2_12_pts, F_2_13_pts;
 
 vector<vector<vector<vector<complex<double> > > > > Tarray;
 vector<vector<vector<double> > > dSA_dX_dY, dSB_dX_dY;
@@ -595,7 +600,7 @@ void break_up_integral(int nt, double &max_DL, double &tauc, double &width)
 	}
 	width = sqrt(width / den);
 	
-	cout << max_DL << "   " << tauc << "   " << width << endl;
+	//cout << max_DL << "   " << tauc << "   " << width << endl;
 	return;
 }
 
@@ -744,7 +749,8 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 
 	create_matrix_2D(&legendre_integral_array, n_k_pts, n_k_pts);
 
-	create_matrix_3D(&A2_pts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	//create_matrix_3D(&A2_pts, n_k_pts, 2*n_tau_pts, 2*n_tau_pts);
+	A2_pts = vector<complex<double> >(4*n_k_pts*n_tau_pts*n_tau_pts);
 	create_matrix_2D(&B_pts, n_k_pts, 2*n_tau_pts);
 	create_matrix_2D(&C_pts, n_k_pts, 2*n_tau_pts);
 	create_matrix_2D(&G3_tauf_taup, n_k_pts, 2*n_tau_pts);
@@ -756,6 +762,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	F_1_13_pts = vector<complex<double> >(n_k_pts);
 	F_12_11_pts = vector<complex<double> >(n_k_pts);
 	F_21_11_pts = vector<complex<double> >(n_k_pts);
+	create_matrix_2D(&F_22_11_pts, n_k_pts, n_k_pts);
 	create_matrix_2D(&F_2_12_pts, n_k_pts, n_k_pts);
 	create_matrix_2D(&F_2_13_pts, n_k_pts, n_k_pts);
 
@@ -767,9 +774,12 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	create_matrix_3D(&dSA_dX_dY, n_u_pts, 3, 3);
 	create_matrix_3D(&dSB_dX_dY, n_u_pts, 3, 3);
 
+	S0x = vector<double>(n_u_pts);
+	create_matrix_2D(&S1Xx, 3, n_u_pts);
+	create_matrix_3D(&S2XYx, 3, 3, n_u_pts);
+
 	create_matrix_3D(&theta0XY, 3, 3, n_u_pts);
 	create_matrix_4D(&theta1XY, 3, 3, n_u_pts, n_u_pts);
-
 
 	create_matrix_3D(&QXk, 3, n_k_pts, n_u_pts);
 	create_matrix_4D(&Tarray, 3, 3, n_k_pts, n_k_pts);

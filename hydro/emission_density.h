@@ -44,22 +44,30 @@ using namespace std;
 
 #include "lib.h"
 #include "defs1.h"
-#include "defs2.h"
 
-inline double S_A(double xi)
+inline double S_A(int iu)
 {
-	double sh_xi = sinh(xi);
-	return ( sh_xi*sh_xi*exp( mT * cosh(xi) - muf) / Tf );
+	double u = u_pts[iu];
+
+	//double sh_xi = sinh(x), ch_xi = cosh(xi);
+	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
+//cout << "SA(): " << sh_xi << "   " << ch_xi << "   " << mT << "   " << ch_xi << "   " << muf << "   " << Tf << endl;
+	return ( sh_xi*sh_xi*exp( mT * ch_xi - muf) / Tf );
 }
 
-inline double S_B(double xi)
+inline double S_B(int iu)
 {
-	double ch_xi = cosh(xi), sh_xi = sinh(xi);
+	double u = u_pts[iu];
+
+	//double sh_xi = sinh(x), ch_xi = cosh(xi);
+	double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 	double a1 = mT*ch_xi, a2 = pT*sh_xi;
 
 	double z = pT*sh_xi/Tf;
 	double sh_z = sinh(z);
 	double ch_z = cosh(z);
+
+//cout << "SB(): " << sh_xi << "   " << ch_xi << "   " << a1 << "   " << a2 << "   " << z << "   " << sh_z << "   " << ch_z << endl;
 
 	return ( a1*sh_z/z - a2*( sh_z - z*ch_z ) / (z*z) );
 }
@@ -227,6 +235,8 @@ inline void set_int_wij_S0x_S0xp()
 
 inline void set_S0(int iu)
 {
+	SA[iu] = S_A(iu);
+	SB[iu] = S_B(iu);
 	S0x[iu] = SA[iu]*SB[iu];
 }
 
@@ -249,11 +259,15 @@ inline void set_S_2_XY(int iu, int iX, int iY)
 inline void set_theta_0_XY(int iu, int iX, int iY)
 {
 	double result = 0.0;
+
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
 		result += u_wts[iup] * bar_w_ij(iu, iup) * S0x[iup] * S2XYx[iX][iY][iu];
+//cout << "theta0 " << u_wts[iup] << "   " << bar_w_ij(iu, iup) << "   " << S0x[iup] << "   " << S2XYx[iX][iY][iu] << endl;
 	}
+
 	result -= int_wij_S0x_S0xp * S2XYx[iX][iY][iu] / N0;
+//cout << "theta0 " << int_wij_S0x_S0xp << "   " << S2XYx[iX][iY][iu] << "   " << N0 << endl;
 	theta0XY[iX][iY][iu] = result;
 }
 

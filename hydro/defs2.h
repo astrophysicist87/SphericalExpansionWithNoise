@@ -18,11 +18,17 @@ using namespace std;
 #include "lib.h"
 #include "defs1.h"
 #include "legendre.h"
+#include "emission_density.h"
+
+inline int indexer(int ik, int it1, int it2)
+{
+	return ( (2*n_tau_pts * ik+it1)*2*n_tau_pts+it2 );
+}
 
 inline void get_roots(double tau, double k, vector<complex<double> > & roots, complex<double> &zeta0)
 {
-	double T = interpolate1D(tau_pts, T_pts, tau, n_tau_pts, 1, false);
-	double mu = interpolate1D(tau_pts, mu_pts, tau, n_tau_pts, 1, false);
+	double T = interpolate1D(all_tau_pts, all_T_pts, tau, 0, false);
+	double mu = interpolate1D(all_tau_pts, all_mu_pts, tau, 0, false);
 	double n0 = n(T, mu);
 	double w0 = w(T, mu);
 	double vsig2 = vsigma2(T, mu);
@@ -37,6 +43,36 @@ inline void get_roots(double tau, double k, vector<complex<double> > & roots, co
 	complex<double> r1, r2, r3;
 
 	solve_cubic_equation(b, c, d, r1, r2, r3);
+
+	roots.push_back( r1 );
+	roots.push_back( r2 );
+	roots.push_back( r3 );
+
+//cout << "nip it in the butt: " << b << "   " << c << "   " << d << "   " << r1 << "   " << r2 << "   " << r3 << endl;
+
+	return;
+}
+
+inline void get_roots_at_tauf(double k, vector<complex<double> > & roots, complex<double> &zeta0)
+{
+	double n0 = n(Tf, muf);
+	double w0 = w(Tf, muf);
+	double vsig2 = vsigma2(Tf, muf);
+	double vs2_0 = vs2(Tf, muf);
+	double vn2_0 = vn2(Tf, muf);
+
+	double b = -2.0*vsig2;
+	double c = (k*k+0.25)*vsig2-(1.0-2.0*vsig2);
+	double d = (k*k+0.25)*(vn2_0-vs2_0)*muf*n0 / w0;	
+	zeta0 = d;
+
+	complex<double> r1, r2, r3;
+
+	solve_cubic_equation(b, c, d, r1, r2, r3);
+
+	roots.push_back( r1 );
+	roots.push_back( r2 );
+	roots.push_back( r3 );
 
 	return;
 }
@@ -63,7 +99,6 @@ inline void set_G3_and_tauDtau_G3_matrices()
 		complex<double> a3 = (r1*r2 + zeta0) * pow(tau/taup, r3) / ((r3-r1)*(r3-r2));
 
 		G3_tau_taup[ik][it][itp] = a1 + a2 + a3;
-
 		tauDtau_G3_tau_taup[ik][it][itp] = r1*a1 + r2*a2 + r3*a3;
 	}
 	return;
@@ -79,7 +114,7 @@ inline void set_G3_and_tauDtau_G3_matrices_at_tauf()
 		double k = k_pts[ik];
 		double taup = all_tau_pts[itp];
 
-		get_roots(tauf, k, roots, zeta0);	//assumes coefficients are evaluated at tau, not tau'
+		get_roots_at_tauf(k, roots, zeta0);	//assumes coefficients are evaluated at tau, not tau'
 
 		complex<double> r1 = roots[0];
 		complex<double> r2 = roots[1];
@@ -117,7 +152,8 @@ inline void set_A2_pts()
 
 		double mu_BY_T = mu_loc/T_loc;
 
-		A2_pts[ik][it][itp] = mu_BY_T * G3_tau_taup[ik][it][itp] + sPERn * tauDtau_G3_tau_taup[ik][it][itp];
+		A2_pts[indexer(ik,it,itp)] = mu_BY_T * G3_tau_taup[ik][it][itp] + sPERn * tauDtau_G3_tau_taup[ik][it][itp];
+//cout << "set_A2_pts(): " << ik << "   " << it << "   " << itp << "   " << mu_BY_T << "   " << G3_tau_taup[ik][it][itp] << "   " << sPERn << "   " << tauDtau_G3_tau_taup[ik][it][itp] << endl;
 	}
 	return;
 }
@@ -160,7 +196,8 @@ inline complex<double> F_12_11(int ik2)
 	{
 		double tau1p = all_tau_pts[it1p];
 		double tau2p = all_tau_pts[it2p];
-		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it1p] * A1_pts[it1p] * A2_pts[ik2][it2p][it1p] / (tau2p*tau2p*pow(tau1p, 6.0) );
+		//sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it1p] * A1_pts[it1p] * A2_pts[ik2][it2p][it1p] / (tau2p*tau2p*pow(tau1p, 6.0) );
+		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it1p] * A1_pts[it1p] * A2_pts[indexer(ik2,it2p,it1p)] / (tau2p*tau2p*pow(tau1p, 6.0) );
 	}
 	return (sum);
 }
@@ -175,32 +212,43 @@ inline complex<double> F_21_11(int ik1)
 	{
 		double tau1p = all_tau_pts[it1p];
 		double tau2p = all_tau_pts[it2p];
-		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A1_pts[it2p] * A2_pts[ik1][it1p][it2p] / (tau1p*tau1p*pow(tau2p, 6.0) );
+		//sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A1_pts[it2p] * A2_pts[ik1][it1p][it2p] / (tau1p*tau1p*pow(tau2p, 6.0) );
+		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A1_pts[it2p] * A2_pts[indexer(ik1,it1p,it2p)] / (tau1p*tau1p*pow(tau2p, 6.0) );
 	}
 	return (sum);
 }
 
 //NOT CHECKED YET
-inline complex<double> F_22_11(int ik1, int ik2)
+//inline complex<double> F_22_11(int ik1, int ik2)
+inline void set_F_22_11_pts()
 {
-	//tau1==tau2==tauf
-	complex<double> sum = 0.0;
-	for (int it1p = 0; it1p < 2*n_tau_pts; ++it1p)
-	for (int it2p = 0; it2p < 2*n_tau_pts; ++it2p)
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
-		double tau1p = all_tau_pts[it1p];
-		double tau2p = all_tau_pts[it2p];
-		double min_t1_t2 = min(tau1p, tau2p);
-		double hw = 0.5 * (min_t1_t2 - tau0);
-		double cen = 0.5 * (min_t1_t2 + tau0);
-		for (int itpp = 0; itpp < n_x_pts; ++itpp)
+		//tau1==tau2==tauf
+		complex<double> sum = 0.0;
+		for (int it1p = 0; it1p < 2*n_tau_pts; ++it1p)
+		for (int it2p = 0; it2p < 2*n_tau_pts; ++it2p)
 		{
-			double taupp = cen + hw * x_pts[itpp];
-			sum += hw * x_wts[itpp] * all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[itpp]
-					* A2_pts[ik2][it1p][it2p] * A2_pts[ik2][it1p][it2p] / (tau1p*tau1p*tau2p*tau2p*pow(taupp, 5.0));
+			double tau1p = all_tau_pts[it1p];
+			double tau2p = all_tau_pts[it2p];
+			double min_t1_t2 = min(tau1p, tau2p);
+			double hw = 0.5 * (min_t1_t2 - tau0);
+			double cen = 0.5 * (min_t1_t2 + tau0);
+			//complex<double> tmpA2_k1 = A2_pts[ik1][it1p][it2p];
+			//complex<double> tmpA2_k2 = A2_pts[ik2][it1p][it2p];
+			complex<double> tmpA2_k1 = A2_pts[indexer(ik1,it1p,it2p)];
+			complex<double> tmpA2_k2 = A2_pts[indexer(ik1,it1p,it2p)];
+			for (int itpp = 0; itpp < n_x_pts; ++itpp)
+			{
+				double taupp = cen + hw * x_pts[itpp];
+				sum += hw * x_wts[itpp] * all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[itpp]
+						* tmpA2_k1 * tmpA2_k2 / (tau1p*tau1p*tau2p*tau2p*pow(taupp, 5.0));
+			}
 		}
+		F_22_11_pts[ik1][ik2] = sum;
 	}
-	return (sum);
+	return;
 }
 
 //NOT CHECKED YET
@@ -226,7 +274,8 @@ inline complex<double> F_2_12(int ik1, int ik2)
 	{
 		double tau1p = all_tau_pts[it1p];
 		double tau2p = all_tau_pts[it2p];
-		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A2_pts[ik1][it1p][it2p] * B_pts[ik2][it2p] / (tau1p*tau1p*pow(tau2p, 5.0) );
+		//sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A2_pts[ik1][it1p][it2p] * B_pts[ik2][it2p] / (tau1p*tau1p*pow(tau2p, 5.0) );
+		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A2_pts[indexer(ik1,it1p,it2p)] * B_pts[ik2][it2p] / (tau1p*tau1p*pow(tau2p, 5.0) );
 	}
 	return (sum);
 }
@@ -254,7 +303,8 @@ inline complex<double> F_2_13(int ik1, int ik2)
 	{
 		double tau1p = all_tau_pts[it1p];
 		double tau2p = all_tau_pts[it2p];
-		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A2_pts[ik1][it1p][it2p] * C_pts[ik2][it2p] / (tau1p*tau1p*pow(tau2p, 5.0) );
+		//sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A2_pts[ik1][it1p][it2p] * C_pts[ik2][it2p] / (tau1p*tau1p*pow(tau2p, 5.0) );
+		sum += all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[it2p] * A2_pts[indexer(ik1,it1p,it2p)] * C_pts[ik2][it2p] / (tau1p*tau1p*pow(tau2p, 5.0) );
 	}
 	return (sum);
 }
@@ -274,19 +324,20 @@ inline void set_T_11()
 		F_21_11_pts[ik] = F_21_11(ik);
 	}
 
+	set_F_22_11_pts();
+
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
 		Tarray[0][0][ik1][ik2] = tauf*tauf*legendre_integral_array[ik1][ik2]
-							* (local_F_11_11 + F_12_11_pts[ik2] + F_12_11_pts[ik1] + F_22_11(ik1, ik2)) / (2.0*M_PI);
+							* (local_F_11_11 + F_12_11_pts[ik2] + F_21_11_pts[ik1] + F_22_11_pts[ik1][ik2]) / (2.0*M_PI);
+//cout << ik1 << "   " << ik2 << "   " << legendre_integral_array[ik1][ik2] << "   " << local_F_11_11 << "   " << F_12_11_pts[ik2] << "   " << F_21_11_pts[ik1] << "   " << F_22_11_pts[ik1][ik2] << endl;
 	}
 	return;
 }
 
 inline void set_T_22()
 {
-	set_B_pts();
-
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
@@ -304,8 +355,6 @@ inline void set_T_22()
 
 inline void set_T_33()
 {
-	set_C_pts();
-
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
@@ -353,9 +402,6 @@ inline void set_T_13()
 
 inline void set_T_23()
 {
-	set_B_pts();
-	set_C_pts();
-
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
@@ -396,6 +442,51 @@ inline void set_T_XY()
 	return;
 }
 
+inline void set_everything_else()
+{
+	set_G3_and_tauDtau_G3_matrices();
+	set_G3_and_tauDtau_G3_matrices_at_tauf();
+
+	set_A1_pts();
+	set_A2_pts();
+	set_B_pts();
+	set_C_pts();
+
+	for (int iu = 0; iu < n_u_pts; ++iu)
+	{
+		set_SA_first_derivatives_vector(iu);
+		set_SA_second_derivatives_array(iu);
+		set_SB_first_derivatives_vector(iu);
+		set_SB_second_derivatives_array(iu);
+	}
+
+	for (int iu = 0; iu < n_u_pts; ++iu)
+	{
+		set_S0(iu);
+		for (int iX = 0; iX < 3; ++iX)
+		{
+			set_S_1_X(iu, iX);
+			for (int iY = 0; iY < 3; ++iY)
+				set_S_2_XY(iu, iX, iY);
+		}
+	}
+
+	set_N0();
+	set_int_wij_S0x_S0xp();
+
+	for (int iX = 0; iX < 3; ++iX)
+	for (int iY = 0; iY < 3; ++iY)
+	for (int iu = 0; iu < n_u_pts; ++iu)
+		set_theta_0_XY(iu, iX, iY);
+
+	for (int iX = 0; iX < 3; ++iX)
+	for (int iY = 0; iY < 3; ++iY)
+	for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
+	for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
+		set_theta_1_XY(iu1, iu2, iX, iY);
+
+	return;
+}
 
 inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 {
@@ -403,9 +494,12 @@ inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_t
 
 	complex<double> result = 0.0;
 
-	//vector<vector<vector<double> > > QXk;
-
+	//legendre stuff here
 	set_Q_X_k(QXk, k_pts, u_pts);
+	compute_legendre_integral(legendre_integral_array, k_pts);
+
+	//set other stuff here
+	set_everything_else();
 
 	set_T_XY();
 
@@ -421,6 +515,8 @@ inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_t
 			result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
 						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
 						*theta0XY[iX][iY][iu];
+//if (abs(Tarray[iX][iY][ik1][ik2]) > 1.e-10)
+//	cout << "line 1: " << iX << "   " << iY<< "   " << ik1 << "   " << ik2 << "   " << Tarray[iX][iY][ik1][ik2] << "   " << iu << "   " << theta0XY[iX][iY][iu] << endl;
 		}
 		for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
 		for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
@@ -428,6 +524,7 @@ inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_t
 			result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
 						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
 						*theta1XY[iX][iY][iu1][iu2];
+//cout << "line 2: " << iu1 << "   " << iu2 << "   " << theta1XY[iX][iY][iu1][iu2] << endl;
 		}
 	}
 

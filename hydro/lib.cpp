@@ -12,14 +12,18 @@ using namespace std;
 
 #include "lib.h"
 
-void solve_cubic_equation(double b, double c, double d, complex<double> &r1, complex<double> &r2, complex<double> &r3)
+void solve_cubic_equation(double b_in, double c_in, double d_in, complex<double> &r1, complex<double> &r2, complex<double> &r3)
 {
 	//assumes leading coefficient has been divided out
 	//double a = 1.0;
 
+	complex<double> b(b_in,0);
+	complex<double> c(c_in,0);
+	complex<double> d(d_in,0);
+
 	const double two_to_one_third = pow(2.0, 1.0/3.0);
 	const double ttot = two_to_one_third;
-	double eps = -b*b+3.0*c;
+	complex<double> eps = -b*b+3.0*c;
 	complex<double> preDelta = - 2.0*b*b*b + 9.0*b*c - 27.0*d + 3.0*sqrt(
 											3.0*(  -b*b*c*c + 4.0*c*c*c + 4.0*b*b*b*d - 18.0*b*c*d + 27.0*d*d ) );
 	complex<double> Delta = pow( preDelta, 1.0/3.0);
@@ -27,6 +31,8 @@ void solve_cubic_equation(double b, double c, double d, complex<double> &r1, com
 	r1 = ( - b + (Delta / ttot) - (ttot*eps/Delta) ) / 3.0;
 	r2 = ( - b - (1.0 - i*sqrt(3.0))*Delta/(2.0*ttot) + (1.0 + i*sqrt(3.0))*eps/(ttot*ttot*Delta) ) / 3.0;
 	r3 = ( - b - (1.0 + i*sqrt(3.0))*Delta/(2.0*ttot) + (1.0 - i*sqrt(3.0))*eps/(ttot*ttot*Delta) ) / 3.0;
+
+//cout << ttot << "   " << Delta << "   " << preDelta << "   " << eps << endl;
 
 	return;
 }
