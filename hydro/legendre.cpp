@@ -23,7 +23,7 @@ inline double gt_k1_gt_k2 (double x, void * params_ptr)
 }
 
 
-void compute_legendre_integral(vector<vector<double> > array, vector<double> k_pts_arr)
+void compute_legendre_integral(vector<vector<double> > & array, vector<double> k_pts_arr)
 {
 //cout << "Made into compute_legendre_integral()!" << endl;
 	int n_k_pts = k_pts_arr.size();
@@ -50,7 +50,7 @@ void compute_legendre_integral(vector<vector<double> > array, vector<double> k_p
 		gsl_integration_qagiu (&F, 1.0, 0, 1e-7, 1000, w, &result, &error); 
 
 		array[ik1][ik2] = result;
-//cout << "Check compute_legendre_integral(): " << k1 << "   " << k2 << "   " << result << endl;
+//cout << "Check compute_legendre_integral(): " << ik1 << "   " << ik2 << "   " << result << endl;
 	}
 
 	gsl_integration_workspace_free (w);
