@@ -8,8 +8,12 @@
 #include <vector>
 #include <cstdlib>
 #include <complex>
+#include <string>
 
 #include <gsl/gsl_integration.h>
+
+#define VNAME(x) #x
+#define VDUMP(x) std::cout << #x << " " << x << std::endl
 
 using namespace std;
 
@@ -19,8 +23,6 @@ inline double cot(double x){return (cos(x)/sin(x));}
 double integrate_1D(double (*f)(double), double * xpts, double * xwts, int nx);
 complex<double> integrate_1D_FT(double (*f)(double), double * xpts, double * xwts, int nx, double k);
 double integrate_2D(double (*f)(double, double), double * xpts, double * ypts, double * xwts, double * ywts, int nx, int ny);
-//double integrate_1D(double (*f)(double), double Lx, int nx);
-//double integrate_2D(double (*f)(double, double), double Lx, double Ly, int nx, int ny);
 
 //main interpolation routine
 double interpolate1D(vector<double> x, vector<double> y, double x0, int kind, bool uniform_spacing,
@@ -58,9 +60,11 @@ void create_matrix_2D(
 	}
 	if (verbose)
 	{
-		cout << "create_matrix_2D():" << endl;
+		/*cout << "create_matrix_2D():" << endl;
 		cout << dim1 << "   " << (*matrix_to_create).size() << endl;
-		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;
+		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;*/
+		cout << "create_matrix_2D(): (" << dim1 << " x " << dim2
+				<< ") <--> (" << (*matrix_to_create).size() << " x " << (*matrix_to_create)[0].size() << ")" << endl;
 	}
 	return;
 }
@@ -93,10 +97,12 @@ void create_matrix_3D(
 	}
 	if (verbose)
 	{
-		cout << "create_matrix_3D():" << endl;
+		/*cout << "create_matrix_3D():" << endl;
 		cout << dim1 << "   " << (*matrix_to_create).size() << endl;
 		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;
-		cout << dim3 << "   " << (*matrix_to_create)[0][0].size() << endl;
+		cout << dim3 << "   " << (*matrix_to_create)[0][0].size() << endl;*/
+		cout << "create_matrix_3D(): (" << dim1 << " x " << dim2 << " x "  << dim3
+				<< ") <--> (" << (*matrix_to_create).size() << " x " << (*matrix_to_create)[0].size() << " x " << (*matrix_to_create)[0][0].size() << ")" << endl;
 	}
 	return;
 }
@@ -138,11 +144,13 @@ void create_matrix_4D(
 	}
 	if (verbose)
 	{
-		cout << "create_matrix_4D():" << endl;
-		cout << dim1 << "   " << (*matrix_to_create).size() << endl;
-		cout << dim2 << "   " << (*matrix_to_create)[0].size() << endl;
-		cout << dim3 << "   " << (*matrix_to_create)[0][0].size() << endl;
-		cout << dim3 << "   " << (*matrix_to_create)[0][0][0].size() << endl;
+		/*cout << "create_matrix_4D():" << endl;
+		cout << dim1 << " <--> " << (*matrix_to_create).size() << endl;
+		cout << dim2 << " <--> " << (*matrix_to_create)[0].size() << endl;
+		cout << dim3 << " <--> " << (*matrix_to_create)[0][0].size() << endl;
+		cout << dim3 << " <--> " << (*matrix_to_create)[0][0][0].size() << endl;*/
+		cout << "create_matrix_4D(): (" << dim1 << " x " << dim2 << " x "  << dim3 << " x "  << dim4
+				<< ") <--> (" << (*matrix_to_create).size() << " x " << (*matrix_to_create)[0].size() << " x " << (*matrix_to_create)[0][0].size() << " x " << (*matrix_to_create)[0][0][0].size() << ")" << endl;
 	}
 	return;
 }

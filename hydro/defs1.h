@@ -690,7 +690,6 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	chi_tilde_T_T = chi_T_T / Delta;
 
 	//set parameters for FTd-Green's functions
-	//a_at_tauf = alpha(Tf, muf);
 	vs2_at_tauf = vs2(Tf, muf);
 	vn2_at_tauf = vn2(Tf, muf);
 	vsigma2_at_tauf = vsigma2(Tf, muf);
@@ -788,7 +787,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 
 	return;
 }
-
+Inset[MaTeX["x^2+y^4=1", Magnification -> 2], {0.1, 0.3}, Scaled[{0.5, 1}]
 // End of file
 
 #endif

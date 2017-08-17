@@ -5,7 +5,6 @@
 #include <vector>
 #include <cstdlib>
 #include <complex>
-//#include <algorithm>
 
 #include <gsl/gsl_sf_legendre.h>
 #include <gsl/gsl_integration.h>
@@ -23,14 +22,14 @@ inline double gt_k1_gt_k2 (double x, void * params_ptr)
 }
 
 
+//CHECKED!!!
 void compute_legendre_integral(vector<vector<double> > & array, vector<double> k_pts_arr)
 {
-//cout << "Made into compute_legendre_integral()!" << endl;
 	int n_k_pts = k_pts_arr.size();
 
 	//assume array has been properly defined elsewhere
 	gsl_function F;
-	F.function = &gt_k1_gt_k2;	//should be gt_k1_gt_k2, I think
+	F.function = &gt_k1_gt_k2;
 
 	params2D my_params;
 
@@ -50,7 +49,7 @@ void compute_legendre_integral(vector<vector<double> > & array, vector<double> k
 		gsl_integration_qagiu (&F, 1.0, 0, 1e-7, 1000, w, &result, &error); 
 
 		array[ik1][ik2] = result;
-//cout << "Check compute_legendre_integral(): " << ik1 << "   " << ik2 << "   " << result << endl;
+//cout << "Check compute_legendre_integral(): " << k_pts_arr[ik1] << "   " << k_pts_arr[ik2] << "   " << result << endl;
 	}
 
 	gsl_integration_workspace_free (w);
@@ -58,6 +57,7 @@ void compute_legendre_integral(vector<vector<double> > & array, vector<double> k
 	return;
 }
 
+//CHECKED!!!
 void set_Q_X_k(vector<vector<vector<double> > > & result, vector<double> k_pts_arr, vector<double> u_pts_arr)
 {
 	int n_k_pts = k_pts_arr.size();

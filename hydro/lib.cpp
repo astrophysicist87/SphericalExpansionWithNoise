@@ -46,11 +46,6 @@ double integrate_1D(double (*f)(double), double * xpts, double * xwts, int nx)
     return (sum);
 }
 
-double integrate_1D_with_peak(double (*f)(double, void *), double a, double b, double xc, double width)
-{
-
-}
-
 complex<double> integrate_1D_FT(double (*f)(double), double * xpts, double * xwts, int nx, double k)
 {
     complex<double> sum = (0,0);
@@ -70,36 +65,6 @@ double integrate_2D(double (*f)(double, double), double * xpts, double * ypts, d
 
 	return (sum);
 }
-
-/*double integrate_1D(double (*f)(double), double Lx, int nx)
-{
-    double sum = 0.0;
-    for (int ix = 1; ix < nx; ix++)
-	{
-		double xp = (double)ix * M_PI / (double)nx;
-		double s1 = sin(xp);
-        sum += (Lx * M_PI) * (*f)(Lx * cot(xp)) / (nx*s1*s1);
-	}
-
-    return (sum);
-}
-
-
-double integrate_2D(double (*f)(double, double), double Lx, double Ly, int nx, int ny)
-{
-    double sum = 0.0;
-    for (int ix = 1; ix < nx; ix++)
-    for (int iy = 1; iy < ny; iy++)
-	{
-		double xp = (double)ix * M_PI / (double)nx;
-		double yp = (double)iy * M_PI / (double)ny;
-		double s1 = sin(xp);
-		double s2 = sin(yp);
-        sum += (Lx * Ly * M_PI * M_PI) * (*f)(Lx * cot(xp), Ly * cot(yp)) / (nx*ny*s1*s1*s2*s2);
-	}
-
-    return (sum);
-}*/
 
 // some interpolation routines here
 double interpolate1D(vector<double> x, vector<double> y, double x0, int kind, bool uniform_spacing, bool returnflag /*= false*/, double default_return_value /* = 0*/)
@@ -344,33 +309,33 @@ long binarySearch(vector<double> A, double value, bool skip_out_of_range /*== tr
 // If skip_out_of_range is set to true, then it will return -1 for those
 // samples that are out of the table range (default is true).
 {
-   int length = A.size();
-   int idx_i, idx_f, idx;
-   idx_i = 0;
-   idx_f = length-1;
+	int length = A.size();
+	int idx_i, idx_f, idx;
+	idx_i = 0;
+	idx_f = length-1;
 
-   if(value > A[idx_f])
-   {
-      if (verbose) cerr << "binarySearch: desired value is too large, exceeding the end of the table: value = " << value << " and A[idx_f] = " << A[idx_f] << endl;
-      if (skip_out_of_range) return -1;
-      exit(1);
-   }
-   if(value < A[idx_i])
-   {
-      if (verbose) cerr << "binarySearch: desired value is too small, exceeding the beginning of table: value = " << value << " and A[idx_i] = " << A[idx_i] << endl;
-      if (skip_out_of_range) return -1;
-      exit(1);
-   }
-   idx = (int) floor((idx_f+idx_i)/2.);
-   while((idx_f-idx_i) > 1)
-   {
-     if(A[idx] < value)
-        idx_i = idx;
-     else
-        idx_f = idx;
-     idx = (int) floor((idx_f+idx_i)/2.);
-   }
-   return(idx_i);
+	if(value > A[idx_f])
+	{
+		if (verbose) cerr << "binarySearch: desired value is too large, exceeding the end of the table: value = " << value << " and A[idx_f] = " << A[idx_f] << endl;
+		if (skip_out_of_range) return -1;
+		exit(1);
+	}
+	if(value < A[idx_i])
+	{
+		if (verbose) cerr << "binarySearch: desired value is too small, exceeding the beginning of table: value = " << value << " and A[idx_i] = " << A[idx_i] << endl;
+		if (skip_out_of_range) return -1;
+		exit(1);
+	}
+	idx = (int) floor((idx_f+idx_i)/2.);
+	while((idx_f-idx_i) > 1)
+	{
+		if(A[idx] < value)
+			idx_i = idx;
+		else
+			idx_f = idx;
+		idx = (int) floor((idx_f+idx_i)/2.);
+	}
+	return(idx_i);
 }
 
 //End of file
