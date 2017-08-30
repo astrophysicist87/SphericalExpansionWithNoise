@@ -42,11 +42,11 @@ using namespace std;
 
 ////////////////////////////////////////////////////////////////////
 // Psi function stuff
-inline double Psi_A(double xi)
+inline double Psi_A(double u)
 {
 	double prefactor = -ds*tauf*tauf*tauf / (8.0*M_PI*M_PI*M_PI);
-	double shxi = sinh(xi);
-	double arg = ( muf - mT*cosh(xi) ) / Tf;	//<=0
+	double shxi = sqrt(u*u-1.0);
+	double arg = ( muf - mT*u ) / Tf;	//<=0
 	return (
 			prefactor * shxi * shxi * exp( arg )
 			);
@@ -76,24 +76,24 @@ inline double Psi_B2(double a1, double a2, double z)
 			);
 }
 
-inline double Psi_0(double xi)
+inline double Psi_0(double u)
 {
-	double a1 = mT*cosh(xi);
-	double a2 = pT*sinh(xi);
+	double a1 = mT*u;
+	double a2 = pT*sqrt(u*u-1.0);
 	return ( Psi_A(xi) * Psi_B0(a1, a2, a2/Tf) );
 }
 
-inline double Psi_1(double xi)
+inline double Psi_1(double u)
 {
-	double a1 = mT*cosh(xi);
-	double a2 = pT*sinh(xi);
+	double a1 = mT*u;
+	double a2 = pT*sqrt(u*u-1.0);
 	return ( Psi_A(xi) * Psi_B1(a1, a2, a2/Tf) );
 }
 
-inline double Psi_2(double xi)
+inline double Psi_2(double u)
 {
-	double a1 = mT*cosh(xi);
-	double a2 = pT*sinh(xi);
+	double a1 = mT*u;
+	double a2 = pT*sqrt(u*u-1.0);
 	return ( Psi_A(xi) * Psi_B2(a1, a2, a2/Tf) );
 }
 
@@ -153,26 +153,26 @@ inline double Psi_b_B2(double a1, double a2, double z)
 
 inline void set_Phi_ij_grids()
 {
-	for (int ixi = 0; ixi < n_xi_pts; ++ixi)
-	for (int ixip = 0; ixip < n_xi_pts; ++ixip)
+	for (int iu = 0; iu < n_u_pts; ++iu)
+	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
-		double xi = xi_pts[ixi], xip = xi_pts[ixip];
-		double sh_xi = sinh(xi), ch_xi = cosh(xi);
-		double sh_xip = sinh(xip), ch_xip = cosh(xip);
+		double u = u_pts[iu], up = u_pts[iup];
+		double sh_xi = sqrt(u*u-1.0), ch_xi = u;
+		double sh_xip = sqrt(up*up-1.0), ch_xip = up;
 
-		double Psi_0_xi = Psi_0(xi), Psi_0_xip = Psi_0(xip);
-		double Psi_1_xi = Psi_1(xi), Psi_1_xip = Psi_1(xip);
-		double Psi_2_xi = Psi_2(xi), Psi_2_xip = Psi_2(xip);
+		double Psi_0_u = Psi_0(u), Psi_0_up = Psi_0(up);
+		double Psi_1_u = Psi_1(u), Psi_1_up = Psi_1(up);
+		double Psi_2_u = Psi_2(u), Psi_2_up = Psi_2(up);
 
-		Phi_0_0[ixi][ixip] = Psi_0_xi * Psi_0_xip;
-		Phi_s_s[ixi][ixip] = 0.5*tauf*tauf*( ( Psi_0_xi - Psi_2_xi) * Psi_0_xip * sh_xi * sh_xi
-											 + ( Psi_0_xip - Psi_2_xip) * Psi_0_xi * sh_xip * sh_xip );
-		Phi_o_o[ixi][ixip] = 0.5*tauf*tauf*( Psi_2_xi * Psi_0_xip * sh_xi * sh_xi
-											 + Psi_2_xip * Psi_0_xi * sh_xip * sh_xip
-											 - 2.0 * Psi_1_xi * Psi_1_xip * sh_xi * sh_xip );
-		Phi_o_t[ixi][ixip] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( Psi_1_xi * Psi_0_xip * sh_xi
-																	- Psi_1_xip * Psi_0_xi * sh_xip );
-		Phi_t_t[ixi][ixip] = 0.5*tauf*tauf*Psi_0_xi * Psi_0_xip * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
+		Phi_0_0[iu][iup] = Psi_0_u * Psi_0_up;
+		Phi_s_s[iu][iup] = 0.5*tauf*tauf*( ( Psi_0_u - Psi_2_u) * Psi_0_up * sh_xi * sh_xi
+											 + ( Psi_0_up - Psi_2_up) * Psi_0_u * sh_xip * sh_xip );
+		Phi_o_o[iu][iup] = 0.5*tauf*tauf*( Psi_2_u * Psi_0_up * sh_xi * sh_xi
+											 + Psi_2_up * Psi_0_u * sh_xip * sh_xip
+											 - 2.0 * Psi_1_u * Psi_1_up * sh_xi * sh_xip );
+		Phi_o_t[iu][iup] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( Psi_1_u * Psi_0_up * sh_xi
+																	- Psi_1_up * Psi_0_u * sh_xip );
+		Phi_t_t[iu][iup] = 0.5*tauf*tauf*Psi_0_u * Psi_0_up * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
 	}
 
 	return;
@@ -408,19 +408,19 @@ inline void set_d_Phi_ij_dX_grids()
 		double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 		double sh_xip = sqrt(up*up-1.0), ch_xip = up;
 
-		double dPsi_0_dX_u = dPsi0_dX[iX][iu], Psi_0_xip = Psi_0(xip, up);
-		double dPsi_1_dX_u = dPsi1_dX[iX][iu], Psi_1_xip = Psi_1(xip, up);
-		double dPsi_2_dX_u = dPsi2_dX[iX][iu], Psi_2_xip = Psi_2(xip, up);
+		double dPsi_0_dX_u = dPsi0_dX[iX][iu], Psi_0_up = Psi_0(up);
+		double dPsi_1_dX_u = dPsi1_dX[iX][iu], Psi_1_up = Psi_1(up);
+		double dPsi_2_dX_u = dPsi2_dX[iX][iu], Psi_2_up = Psi_2(up);
 
-		d_Phi_0_0_dX[ixi][ixip] = dPsi_0_dX_u * Psi_0_xip;
-		d_Phi_s_s_dX[ixi][ixip] = 0.5*tauf*tauf*( ( dPsi_0_dX_u - dPsi_2_dX_u) * Psi_0_xip * sh_xi * sh_xi
-											 + ( Psi_0_xip - Psi_2_xip) * dPsi_0_dX_u * sh_xip * sh_xip );
-		d_Phi_o_o_dX[ixi][ixip] = 0.5*tauf*tauf*( dPsi_2_dX_u * Psi_0_xip * sh_xi * sh_xi
-											 + Psi_2_xip * dPsi_0_dX_u * sh_xip * sh_xip
-											 - 2.0 * dPsi_1_dX_u * Psi_1_xip * sh_xi * sh_xip );
-		d_Phi_o_t_dX[ixi][ixip] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( dPsi_1_dX_u * Psi_0_xip * sh_xi
-																	- Psi_1_xip * dPsi_0_dX_u * sh_xip );
-		d_Phi_t_t_dX[ixi][ixip] = 0.5*tauf*tauf*dPsi_0_dX_u * Psi_0_xip * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
+		d_Phi_0_0_dX[iu][iup] = dPsi_0_dX_u * Psi_0_up;
+		d_Phi_s_s_dX[iu][iup] = 0.5*tauf*tauf*( ( dPsi_0_dX_u - dPsi_2_dX_u) * Psi_0_up * sh_xi * sh_xi
+											 + ( Psi_0_up - Psi_2_up) * dPsi_0_dX_u * sh_xip * sh_xip );
+		d_Phi_o_o_dX[iu][iup] = 0.5*tauf*tauf*( dPsi_2_dX_u * Psi_0_up * sh_xi * sh_xi
+											 + Psi_2_up * dPsi_0_dX_u * sh_xip * sh_xip
+											 - 2.0 * dPsi_1_dX_u * Psi_1_up * sh_xi * sh_xip );
+		d_Phi_o_t_dX[iu][iup] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( dPsi_1_dX_u * Psi_0_up * sh_xi
+																	- Psi_1_up * dPsi_0_dX_u * sh_xip );
+		d_Phi_t_t_dX[iu][iup] = 0.5*tauf*tauf*dPsi_0_dX_u * Psi_0_up * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
 	}
 
 	return;
@@ -429,6 +429,7 @@ inline void set_d_Phi_ij_dX_grids()
 inline void set_d_Phi_ij_dX_dY_grids()
 {
 	for (int iX = 0; iX < 3; ++iX)
+	for (int iY = 0; iY < 3; ++iY)
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
@@ -436,19 +437,19 @@ inline void set_d_Phi_ij_dX_dY_grids()
 		double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 		double sh_xip = sqrt(up*up-1.0), ch_xip = up;
 
-		double dPsi_0_dX_dY_u = dPsi0_dX_dY[iX][iu], Psi_0_up = Psi_0(xip, up);
-		double dPsi_1_dX_dY_u = dPsi1_dX_dY[iX][iu], Psi_1_up = Psi_1(xip, up);
-		double dPsi_2_dX_dY_u = dPsi2_dX_dY[iX][iu], Psi_2_up = Psi_2(xip, up);
+		double dPsi_0_dX_dY_u = dPsi0_dX_dY[iX][iu], Psi_0_up = Psi_0(up);
+		double dPsi_1_dX_dY_u = dPsi1_dX_dY[iX][iu], Psi_1_up = Psi_1(up);
+		double dPsi_2_dX_dY_u = dPsi2_dX_dY[iX][iu], Psi_2_up = Psi_2(up);
 
-		d_Phi_0_0_dX_dY[ixi][ixip] = dPsi_0_dX_dY_u * Psi_0_up;
-		d_Phi_s_s_dX_dY[ixi][ixip] = 0.5*tauf*tauf*( ( dPsi_0_dX_dY_u - dPsi_2_dX_dY_u) * Psi_0_up * sh_xi * sh_xi
+		d_Phi_0_0_dX_dY[iu][iup] = dPsi_0_dX_dY_u * Psi_0_up;
+		d_Phi_s_s_dX_dY[iu][iup] = 0.5*tauf*tauf*( ( dPsi_0_dX_dY_u - dPsi_2_dX_dY_u) * Psi_0_up * sh_xi * sh_xi
 											 + ( Psi_0_up - Psi_2_up) * dPsi_0_dX_dY_u * sh_xip * sh_xip );
-		d_Phi_o_o_dX_dY[ixi][ixip] = 0.5*tauf*tauf*( dPsi_2_dX_dY_u * Psi_0_up * sh_xi * sh_xi
+		d_Phi_o_o_dX_dY[iu][iup] = 0.5*tauf*tauf*( dPsi_2_dX_dY_u * Psi_0_up * sh_xi * sh_xi
 											 + Psi_2_up * dPsi_0_dX_dY_u * sh_xip * sh_xip
 											 - 2.0 * dPsi_1_dX_dY_u * Psi_1_up * sh_xi * sh_xip );
-		d_Phi_o_t_dX_dY[ixi][ixip] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( dPsi_1_dX_dY_u * Psi_0_up * sh_xi
+		d_Phi_o_t_dX_dY[iu][iup] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( dPsi_1_dX_dY_u * Psi_0_up * sh_xi
 																	- Psi_1_up * dPsi_0_dX_dY_u * sh_xip );
-		d_Phi_t_t_dX_dY[ixi][ixip] = 0.5*tauf*tauf*dPsi_0_dX_dY_u * Psi_0_up * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
+		d_Phi_t_t_dX_dY[iu][iup] = 0.5*tauf*tauf*dPsi_0_dX_dY_u * Psi_0_up * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
 	}
 
 	return;
@@ -458,6 +459,7 @@ inline void set_d_Phi_ij_dX_dY_grids()
 inline void set_d_Phi_ij_dX_dYp_grids()
 {
 	for (int iX = 0; iX < 3; ++iX)
+	for (int iYp = 0; iYp < 3; ++iYp)
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
@@ -469,15 +471,15 @@ inline void set_d_Phi_ij_dX_dYp_grids()
 		double dPsi_1_dX_u = dPsi1_dX[iX][iu], dPsi_1_dYp_up = dPsi1_dX[iX][iup];
 		double dPsi_2_dX_u = dPsi2_dX[iX][iu], dPsi_2_dYp_up = dPsi2_dX[iX][iup];
 
-		d_Phi_0_0_dX_dYp[ixi][ixip] = dPsi_0_dX_u * dPsi_0_xip;
-		d_Phi_s_s_dX_dYp[ixi][ixip] = 0.5*tauf*tauf*( ( dPsi_0_dX_u - dPsi_2_dX_u) * dPsi_0_dYp_up * sh_xi * sh_xi
+		d_Phi_0_0_dX_dYp[iu][iup] = dPsi_0_dX_u * dPsi_0_dYp_up;
+		d_Phi_s_s_dX_dYp[iu][iup] = 0.5*tauf*tauf*( ( dPsi_0_dX_u - dPsi_2_dX_u) * dPsi_0_dYp_up * sh_xi * sh_xi
 											 + ( dPsi_0_dYp_up - dPsi_2_dYp_up) * dPsi_0_dX_u * sh_xip * sh_xip );
-		d_Phi_o_o_dX_dYp[ixi][ixip] = 0.5*tauf*tauf*( dPsi_2_dX_u * dPsi_0_dYp_up * sh_xi * sh_xi
-											 + dPsi_2_xip * dPsi_0_dX_u * sh_xip * sh_xip
+		d_Phi_o_o_dX_dYp[iu][iup] = 0.5*tauf*tauf*( dPsi_2_dX_u * dPsi_0_dYp_up * sh_xi * sh_xi
+											 + dPsi_2_dYp_up * dPsi_0_dX_u * sh_xip * sh_xip
 											 - 2.0 * dPsi_1_dX_u * dPsi_1_dYp_up * sh_xi * sh_xip );
-		d_Phi_o_t_dX_dYp[ixi][ixip] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( dPsi_1_dX_u * dPsi_0_dYp_up * sh_xi
+		d_Phi_o_t_dX_dYp[iu][iup] = 0.5*tauf*tauf*( ch_xi - ch_xip ) * ( dPsi_1_dX_u * dPsi_0_dYp_up * sh_xi
 																	- dPsi_1_dYp_up * dPsi_0_dX_u * sh_xip );
-		d_Phi_t_t_dX_dYp[ixi][ixip] = 0.5*tauf*tauf*dPsi_0_dX_u * dPsi_0_dYp_up * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
+		d_Phi_t_t_dX_dYp[iu][iup] = 0.5*tauf*tauf*dPsi_0_dX_u * dPsi_0_dYp_up * ( ch_xi - ch_xip ) * ( ch_xi - ch_xip );
 	}
 
 	return;
