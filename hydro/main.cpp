@@ -15,7 +15,7 @@ using namespace std;
 #include "lib.h"
 #include "defs1.h"
 #include "defs2.h"
-#include "emission_density.h"
+#include "HBT_and_emission_density.h"
 #include "gauss_quadrature.h"
 
 bool do_1p_calc;

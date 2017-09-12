@@ -10,7 +10,9 @@ HDRS= \
 gauss_quadrature.h \
 defs1.h \
 defs2.h \
-emission_density.h \
+HBT_and_emission_density.h \
+Phi_functions_and_derivatives.h \
+Psi_functions_and_derivatives.h \
 lib.h \
 legendre.h
 

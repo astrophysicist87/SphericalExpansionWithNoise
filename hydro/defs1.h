@@ -787,7 +787,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 
 	return;
 }
-Inset[MaTeX["x^2+y^4=1", Magnification -> 2], {0.1, 0.3}, Scaled[{0.5, 1}]
+
 // End of file
 
 #endif
