@@ -18,7 +18,7 @@ using namespace std;
 #include "lib.h"
 #include "defs1.h"
 #include "legendre.h"
-#include "emission_density.h"
+#include "HBT_and_emission_density.h"
 
 inline int indexer(int ik, int it1, int it2)
 {
@@ -444,6 +444,7 @@ inline void set_T_XY()
 
 inline void set_everything_else()
 {
+	//transport related functions here...
 	set_G3_and_tauDtau_G3_matrices();
 	set_G3_and_tauDtau_G3_matrices_at_tauf();
 
@@ -452,38 +453,30 @@ inline void set_everything_else()
 	set_B_pts();
 	set_C_pts();
 
-	for (int iu = 0; iu < n_u_pts; ++iu)
-	{
-		set_SA_first_derivatives_vector(iu);
-		set_SA_second_derivatives_array(iu);
-		set_SB_first_derivatives_vector(iu);
-		set_SB_second_derivatives_array(iu);
-	}
+	//HBT related functions here...
+	//set earliest stuff first
+	set_PsiA_first_derivatives_vector();
+	set_PsiA_second_derivatives_array();
+	set_PsiBk_first_derivatives_vector();
+	set_PsiBk_second_derivatives_array();
+	set_Psi_k();
 
-	for (int iu = 0; iu < n_u_pts; ++iu)
-	{
-		set_S0(iu);
-		for (int iX = 0; iX < 3; ++iX)
-		{
-			set_S_1_X(iu, iX);
-			for (int iY = 0; iY < 3; ++iY)
-				set_S_2_XY(iu, iX, iY);
-		}
-	}
+	//next layer of dependence
+	set_dPsik_dX();
+	set_dPsik_dX_dY();
 
-	set_N0();
-	set_int_wij_S0x_S0xp();
+	//next layer
+	set_Phi_ij_grids();
+	set_d_Phi_ij_dX_grids();
+	set_d_Phi_ij_dX_dY_grids();
+	set_d_Phi_ij_dX_dYp_grids();
+	set_integrated_d_Phi_ij_dX_grids();
+	set_integrated_d_Phi_ij_dX_dY_grids();
+	set_N_00_ij();
 
-	for (int iX = 0; iX < 3; ++iX)
-	for (int iY = 0; iY < 3; ++iY)
-	for (int iu = 0; iu < n_u_pts; ++iu)
-		set_theta_0_XY(iu, iX, iY);
-
-	for (int iX = 0; iX < 3; ++iX)
-	for (int iY = 0; iY < 3; ++iY)
-	for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
-	for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
-		set_theta_1_XY(iu1, iu2, iX, iY);
+	//final layer
+	set_theta_0_ij_XY();
+	set_theta_1_ij_XY();
 
 	return;
 }
@@ -512,18 +505,18 @@ inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_t
 		double k2 = k_pts[ik2];
 		for (int iu = 0; iu < n_u_pts; ++iu)
 		{
-			result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
-						*theta0XY[iX][iY][iu];
+			//result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+			//			*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
+			//			*theta0XY[iX][iY][iu];
 //if (abs(Tarray[iX][iY][ik1][ik2]) > 1.e-10)
 //	cout << "line 1: " << iX << "   " << iY<< "   " << ik1 << "   " << ik2 << "   " << Tarray[iX][iY][ik1][ik2] << "   " << iu << "   " << theta0XY[iX][iY][iu] << endl;
 		}
 		for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
 		for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
 		{
-			result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
-						*theta1XY[iX][iY][iu1][iu2];
+			//result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+			//			*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+			//			*theta1XY[iX][iY][iu1][iu2];
 //cout << "line 2: " << iu1 << "   " << iu2 << "   " << theta1XY[iX][iY][iu1][iu2] << endl;
 		}
 	}

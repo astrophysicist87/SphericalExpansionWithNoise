@@ -32,9 +32,9 @@ inline void set_Phi_ij_grids()
 		double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 		double sh_xip = sqrt(up*up-1.0), ch_xip = up;
 
-		double Psi_0_u = Psi_0[iu], Psi_0_up = Psi0[iup];
-		double Psi_1_u = Psi_1[iu], Psi_1_up = Psi1[iup];
-		double Psi_2_u = Psi_2[iu], Psi_2_up = Psi2[iup];
+		double Psi_0_u = Psi0[iu], Psi_0_up = Psi0[iup];
+		double Psi_1_u = Psi1[iu], Psi_1_up = Psi1[iup];
+		double Psi_2_u = Psi2[iu], Psi_2_up = Psi2[iup];
 
 		Phi_0_0[iu][iup] = Psi_0_u * Psi_0_up;
 		Phi_s_s[iu][iup] = 0.5*tauf*tauf*( ( Psi_0_u - Psi_2_u) * Psi_0_up * sh_xi * sh_xi
@@ -89,9 +89,9 @@ inline void set_d_Phi_ij_dX_dY_grids()
 		double sh_xi = sqrt(u*u-1.0), ch_xi = u;
 		double sh_xip = sqrt(up*up-1.0), ch_xip = up;
 
-		double dPsi_0_dX_dY_u = dPsi0_dX_dY[iX][iY][iu], Psi_0_up = Psi_0[iup];
-		double dPsi_1_dX_dY_u = dPsi1_dX_dY[iX][iY][iu], Psi_1_up = Psi_1[iup];
-		double dPsi_2_dX_dY_u = dPsi2_dX_dY[iX][iY][iu], Psi_2_up = Psi_2[iup];
+		double dPsi_0_dX_dY_u = dPsi0_dX_dY[iX][iY][iu], Psi_0_up = Psi0[iup];
+		double dPsi_1_dX_dY_u = dPsi1_dX_dY[iX][iY][iu], Psi_1_up = Psi1[iup];
+		double dPsi_2_dX_dY_u = dPsi2_dX_dY[iX][iY][iu], Psi_2_up = Psi2[iup];
 
 		d_Phi_0_0_dX_dY[iX][iY][iu][iup] = dPsi_0_dX_dY_u * Psi_0_up;
 		d_Phi_s_s_dX_dY[iX][iY][iu][iup] = 0.5*tauf*tauf*( ( dPsi_0_dX_dY_u - dPsi_2_dX_dY_u) * Psi_0_up * sh_xi * sh_xi

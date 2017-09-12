@@ -83,15 +83,44 @@ vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
 vector<vector<complex<double> > > F_22_11_pts, F_2_12_pts, F_2_13_pts;
 
 vector<vector<vector<vector<complex<double> > > > > Tarray;
-vector<vector<vector<double> > > dSA_dX_dY, dSB_dX_dY;
+vector<vector<double> > legendre_integral_array;
+/*vector<vector<vector<double> > > dSA_dX_dY, dSB_dX_dY;
 vector<vector<double> > dSA_dX, dSB_dX;
 vector<double> SA, SB;
-vector<vector<double> > legendre_integral_array;
 vector<double> S0x;
 vector<vector<double> > S1Xx;
 vector<vector<vector<double> > > S2XYx;
 vector<vector<vector<double> > > theta0XY;
-vector<vector<vector<vector<double> > > > theta1XY;
+vector<vector<vector<vector<double> > > > theta1XY;*/
+
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+//0D
+double
+	N_00_00, N_00_ss, N_00_oo, N_00_ot, N_00_tt;
+//1D
+vector<double>
+	Psi0, Psi1, Psi2, PsiA, PsiB0, PsiB1, PsiB2;
+//2D
+vector<vector<double> >
+	dPsiA_dX, dPsi0_dX, dPsi1_dX, dPsi2_dX, dPsiB0_dX, dPsiB1_dX, dPsiB2_dX,
+	Phi_0_0, Phi_s_s, Phi_o_o, Phi_o_t, Phi_t_t,
+	int_dup_d_Phi_0_0_dX, int_dup_d_Phi_s_s_dX, int_dup_d_Phi_o_o_dX, int_dup_d_Phi_o_t_dX,
+	int_dup_d_Phi_t_t_dX;
+//3D
+vector<vector<vector<double> > >
+	dPsiA_dX_dY, dPsiB0_dX_dY, dPsiB1_dX_dY, dPsiB2_dX_dY, dPsi0_dX_dY, dPsi1_dX_dY, dPsi2_dX_dY,
+	d_Phi_0_0_dX, d_Phi_s_s_dX, d_Phi_o_o_dX, d_Phi_o_t_dX, d_Phi_t_t_dX,
+	int_dup_d_Phi_0_0_dX_dY, int_dup_d_Phi_s_s_dX_dY, int_dup_d_Phi_o_o_dX_dY,
+	int_dup_d_Phi_o_t_dX_dY, int_dup_d_Phi_t_t_dX_dY,
+	theta_0_ss_XY, theta_0_oo_XY, theta_0_ot_XY, theta_0_tt_XY;
+//4D
+vector<vector<vector<vector<double> > > >
+	d_Phi_0_0_dX_dY, d_Phi_s_s_dX_dY, d_Phi_o_o_dX_dY, d_Phi_o_t_dX_dY, d_Phi_t_t_dX_dY,
+	d_Phi_0_0_dX_dYp, d_Phi_s_s_dX_dYp, d_Phi_o_o_dX_dYp, d_Phi_o_t_dX_dYp, d_Phi_t_t_dX_dYp,
+	theta_1_ss_XY, theta_1_oo_XY, theta_1_ot_XY, theta_1_tt_XY;
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
 
 vector<vector<vector<double> > > QXk;
 
@@ -765,7 +794,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	create_matrix_2D(&F_2_12_pts, n_k_pts, n_k_pts);
 	create_matrix_2D(&F_2_13_pts, n_k_pts, n_k_pts);
 
-	SA = vector<double>(n_u_pts);
+	/*SA = vector<double>(n_u_pts);
 	SB = vector<double>(n_u_pts);
 	create_matrix_2D(&dSA_dX, n_u_pts, 3);
 	create_matrix_2D(&dSA_dX, n_u_pts, 3);
@@ -778,7 +807,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	create_matrix_3D(&S2XYx, 3, 3, n_u_pts);
 
 	create_matrix_3D(&theta0XY, 3, 3, n_u_pts);
-	create_matrix_4D(&theta1XY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&theta1XY, 3, 3, n_u_pts, n_u_pts);*/
 
 	create_matrix_3D(&QXk, 3, n_k_pts, n_u_pts);
 	create_matrix_4D(&Tarray, 3, 3, n_k_pts, n_k_pts);
