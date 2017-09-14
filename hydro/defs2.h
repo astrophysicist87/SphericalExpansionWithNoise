@@ -455,13 +455,15 @@ inline void set_everything_else()
 
 	//HBT related functions here...
 	//set earliest stuff first
+	set_PsiA();
 	set_PsiA_first_derivatives_vector();
 	set_PsiA_second_derivatives_array();
+	set_PsiBk();
 	set_PsiBk_first_derivatives_vector();
 	set_PsiBk_second_derivatives_array();
-	set_Psi_k();
 
 	//next layer of dependence
+	set_Psi_k();
 	set_dPsik_dX();
 	set_dPsik_dX_dY();
 
@@ -475,17 +477,17 @@ inline void set_everything_else()
 	set_N_00_ij();
 
 	//final layer
-	set_theta_0_ij_XY();
-	set_theta_1_ij_XY();
+	//set_theta_0_ij_XY();
+	//set_theta_1_ij_XY();
 
 	return;
 }
 
-inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
+inline void set_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 {
 	initialize_all(chosen_trajectory, particle_to_study);
 
-	complex<double> result = 0.0;
+	complex<double> result_ss = 0.0, result_oo = 0.0, result_ot = 0.0, result_tt = 0.0;
 
 	//legendre stuff here
 	set_Q_X_k(QXk, k_pts, u_pts);
@@ -505,23 +507,41 @@ inline complex<double> get_mean_delta_R2ij(int chosen_trajectory, int particle_t
 		double k2 = k_pts[ik2];
 		for (int iu = 0; iu < n_u_pts; ++iu)
 		{
-			//result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-			//			*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
-			//			*theta0XY[iX][iY][iu];
+			result_ss += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
+						*theta_0_ss_XY[iX][iY][iu];
+			result_oo += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
+						*theta_0_oo_XY[iX][iY][iu];
+			result_ot += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
+						*theta_0_ot_XY[iX][iY][iu];
+			result_tt += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
+						*theta_0_tt_XY[iX][iY][iu];
 //if (abs(Tarray[iX][iY][ik1][ik2]) > 1.e-10)
 //	cout << "line 1: " << iX << "   " << iY<< "   " << ik1 << "   " << ik2 << "   " << Tarray[iX][iY][ik1][ik2] << "   " << iu << "   " << theta0XY[iX][iY][iu] << endl;
 		}
 		for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
 		for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
 		{
-			//result += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-			//			*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
-			//			*theta1XY[iX][iY][iu1][iu2];
+			result_ss += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+						*theta_1_ss_XY[iX][iY][iu1][iu2];
+			result_oo += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+						*theta_1_oo_XY[iX][iY][iu1][iu2];
+			result_ot += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+						*theta_1_ot_XY[iX][iY][iu1][iu2];
+			result_tt += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
+						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+						*theta_1_tt_XY[iX][iY][iu1][iu2];
 //cout << "line 2: " << iu1 << "   " << iu2 << "   " << theta1XY[iX][iY][iu1][iu2] << endl;
 		}
 	}
 
-	return (result / (N0*N0));
+	return;
 }
 
 

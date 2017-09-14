@@ -25,6 +25,7 @@ using namespace std;
 
 inline void set_Phi_ij_grids()
 {
+//CHECKED
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
@@ -52,6 +53,7 @@ inline void set_Phi_ij_grids()
 
 inline void set_d_Phi_ij_dX_grids()
 {
+//CHECKED
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	for (int iup = 0; iup < n_u_pts; ++iup)
@@ -80,6 +82,7 @@ inline void set_d_Phi_ij_dX_grids()
 
 inline void set_d_Phi_ij_dX_dY_grids()
 {
+//CHECKED
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iY = 0; iY < 3; ++iY)
 	for (int iu = 0; iu < n_u_pts; ++iu)
@@ -110,6 +113,7 @@ inline void set_d_Phi_ij_dX_dY_grids()
 //notice that this function is different from the preceding one ( dY <--> dYp )
 inline void set_d_Phi_ij_dX_dYp_grids()
 {
+//CHECKED
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iYp = 0; iYp < 3; ++iYp)
 	for (int iu = 0; iu < n_u_pts; ++iu)

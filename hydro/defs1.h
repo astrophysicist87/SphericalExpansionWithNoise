@@ -45,7 +45,7 @@ double chi_tilde_mu_mu, chi_tilde_T_mu, chi_tilde_T_T, Delta;
 double exp_delta, exp_gamma, exp_nu;
 double T0, mu0, Tc, Pc, nc, sc, wc, muc;
 double A0, A2, A4, C0, B, mui, muf, xi0, xibar0, etaBYs, RD, sPERn, Nf, qD, si, ni;
-double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf, tau0, s_tilde, kappa_S, kappa_C;
+double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf, tau0;
 
 extern double mT, pT;
 
@@ -794,20 +794,83 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	create_matrix_2D(&F_2_12_pts, n_k_pts, n_k_pts);
 	create_matrix_2D(&F_2_13_pts, n_k_pts, n_k_pts);
 
-	/*SA = vector<double>(n_u_pts);
-	SB = vector<double>(n_u_pts);
-	create_matrix_2D(&dSA_dX, n_u_pts, 3);
-	create_matrix_2D(&dSA_dX, n_u_pts, 3);
-	create_matrix_2D(&dSB_dX, n_u_pts, 3);
-	create_matrix_3D(&dSA_dX_dY, n_u_pts, 3, 3);
-	create_matrix_3D(&dSB_dX_dY, n_u_pts, 3, 3);
-
-	S0x = vector<double>(n_u_pts);
-	create_matrix_2D(&S1Xx, 3, n_u_pts);
-	create_matrix_3D(&S2XYx, 3, 3, n_u_pts);
-
-	create_matrix_3D(&theta0XY, 3, 3, n_u_pts);
-	create_matrix_4D(&theta1XY, 3, 3, n_u_pts, n_u_pts);*/
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
+	//1D
+	Psi0 = vector<double>(n_u_pts);
+	Psi1 = vector<double>(n_u_pts);
+	Psi2 = vector<double>(n_u_pts);
+	PsiA = vector<double>(n_u_pts);
+	PsiB0 = vector<double>(n_u_pts);
+	PsiB1 = vector<double>(n_u_pts);
+	PsiB2 = vector<double>(n_u_pts);
+	//
+	//2D
+	create_matrix_2D(&dPsiA_dX, 3, n_u_pts);
+	create_matrix_2D(&dPsi0_dX, 3, n_u_pts);
+	create_matrix_2D(&dPsi1_dX, 3, n_u_pts);
+	create_matrix_2D(&dPsi2_dX, 3, n_u_pts);
+	create_matrix_2D(&dPsiB0_dX, 3, n_u_pts);
+	create_matrix_2D(&dPsiB1_dX, 3, n_u_pts);
+	create_matrix_2D(&dPsiB2_dX, 3, n_u_pts);
+	//
+	create_matrix_2D(&Phi_0_0, n_u_pts, n_u_pts);
+	create_matrix_2D(&Phi_s_s, n_u_pts, n_u_pts);
+	create_matrix_2D(&Phi_o_o, n_u_pts, n_u_pts);
+	create_matrix_2D(&Phi_o_t, n_u_pts, n_u_pts);
+	create_matrix_2D(&Phi_t_t, n_u_pts, n_u_pts);
+	//
+	create_matrix_2D(&int_dup_d_Phi_0_0_dX, n_u_pts, n_u_pts);
+	create_matrix_2D(&int_dup_d_Phi_s_s_dX, n_u_pts, n_u_pts);
+	create_matrix_2D(&int_dup_d_Phi_o_o_dX, n_u_pts, n_u_pts);
+	create_matrix_2D(&int_dup_d_Phi_o_t_dX, n_u_pts, n_u_pts);
+	create_matrix_2D(&int_dup_d_Phi_t_t_dX, n_u_pts, n_u_pts);
+	//
+	//3D
+	create_matrix_3D(&dPsiA_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&dPsiB0_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&dPsiB1_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&dPsiB2_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&dPsi0_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&dPsi1_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&dPsi2_dX_dY, 3, 3, n_u_pts);
+	//
+	create_matrix_3D(&d_Phi_0_0_dX, 3, n_u_pts, n_u_pts);
+	create_matrix_3D(&d_Phi_s_s_dX, 3, n_u_pts, n_u_pts);
+	create_matrix_3D(&d_Phi_o_o_dX, 3, n_u_pts, n_u_pts);
+	create_matrix_3D(&d_Phi_o_t_dX, 3, n_u_pts, n_u_pts);
+	create_matrix_3D(&d_Phi_t_t_dX, 3, n_u_pts, n_u_pts);
+	//
+	create_matrix_3D(&int_dup_d_Phi_0_0_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&int_dup_d_Phi_s_s_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&int_dup_d_Phi_o_o_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&int_dup_d_Phi_o_t_dX_dY, 3, 3, n_u_pts);
+	create_matrix_3D(&int_dup_d_Phi_t_t_dX_dY, 3, 3, n_u_pts);
+	//
+	create_matrix_3D(&theta_0_ss_XY, 3, 3, n_u_pts);
+	create_matrix_3D(&theta_0_oo_XY, 3, 3, n_u_pts);
+	create_matrix_3D(&theta_0_ot_XY, 3, 3, n_u_pts);
+	create_matrix_3D(&theta_0_tt_XY, 3, 3, n_u_pts);
+	//
+	//4D
+	create_matrix_4D(&d_Phi_0_0_dX_dY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_s_s_dX_dY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_o_o_dX_dY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_o_t_dX_dY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_t_t_dX_dY, 3, 3, n_u_pts, n_u_pts);
+	//
+	create_matrix_4D(&d_Phi_0_0_dX_dYp, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_s_s_dX_dYp, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_o_o_dX_dYp, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_o_t_dX_dYp, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&d_Phi_t_t_dX_dYp, 3, 3, n_u_pts, n_u_pts);
+	//
+	create_matrix_4D(&theta_1_ss_XY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&theta_1_oo_XY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&theta_1_ot_XY, 3, 3, n_u_pts, n_u_pts);
+	create_matrix_4D(&theta_1_tt_XY, 3, 3, n_u_pts, n_u_pts);
+	//////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////
 
 	create_matrix_3D(&QXk, 3, n_k_pts, n_u_pts);
 	create_matrix_4D(&Tarray, 3, 3, n_k_pts, n_k_pts);
