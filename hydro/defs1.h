@@ -47,7 +47,7 @@ double T0, mu0, Tc, Pc, nc, sc, wc, muc;
 double A0, A2, A4, C0, B, mui, muf, xi0, xibar0, etaBYs, RD, sPERn, Nf, qD, si, ni;
 double a_at_tauf, vs2_at_tauf, vn2_at_tauf, vsigma2_at_tauf, tau0;
 
-extern double mT, pT;
+extern double mT, pT, betaT;
 
 double current_kwt, current_DY;
 int current_itau;
@@ -71,11 +71,10 @@ vector<double> T_pts_upper, mu_pts_upper;
 vector<double> all_T_pts, all_mu_pts;
 vector<double> Delta_lambda_pts, vn2_pts, vs2_pts, vsigma2_pts, n_Tmu_pts, s_Tmu_pts, w_Tmu_pts;
 
-vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
+/*vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
 vector<vector<complex<double> > > G3_tauf_taup, tauDtau_G3_tauf_taup;
 vector<double> transport_pts;
 vector<double> A1_pts;
-//vector<vector<vector<complex<double> > > > A2_pts;
 vector<complex<double> > A2_pts;
 vector<vector<complex<double> > > B_pts, C_pts;
 
@@ -83,15 +82,20 @@ vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
 vector<vector<complex<double> > > F_22_11_pts, F_2_12_pts, F_2_13_pts;
 
 vector<vector<vector<vector<complex<double> > > > > Tarray;
-vector<vector<double> > legendre_integral_array;
-/*vector<vector<vector<double> > > dSA_dX_dY, dSB_dX_dY;
-vector<vector<double> > dSA_dX, dSB_dX;
-vector<double> SA, SB;
-vector<double> S0x;
-vector<vector<double> > S1Xx;
-vector<vector<vector<double> > > S2XYx;
-vector<vector<vector<double> > > theta0XY;
-vector<vector<vector<vector<double> > > > theta1XY;*/
+vector<vector<double> > legendre_integral_array;*/
+vector<complex<double> > G3_tau_taup, tauDtau_G3_tau_taup;
+vector<complex<double> > G3_tauf_taup, tauDtau_G3_tauf_taup;
+vector<double> transport_pts;
+vector<double> A1_pts;
+vector<complex<double> > A2_pts;
+vector<complex<double> > B_pts, C_pts;
+
+vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
+vector<complex<double> > F_22_11_pts, F_2_12_pts, F_2_13_pts;
+
+vector<complex<double> > Tarray;
+vector<double> legendre_integral_array;
+
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -123,8 +127,6 @@ vector<vector<vector<vector<double> > > >
 //////////////////////////////////////////////////////////
 
 vector<vector<vector<double> > > QXk;
-
-double bar_w_ij(int iu, int iup);
 
 //general functions
 inline double Omega(double x)

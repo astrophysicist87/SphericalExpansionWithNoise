@@ -477,17 +477,17 @@ inline void set_everything_else()
 	set_N_00_ij();
 
 	//final layer
-	//set_theta_0_ij_XY();
-	//set_theta_1_ij_XY();
+	set_theta_0_ij_XY();
+	set_theta_1_ij_XY();
 
 	return;
 }
 
 inline void set_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 {
-	initialize_all(chosen_trajectory, particle_to_study);
+	bool include_self_correlations = false;
 
-	complex<double> result_ss = 0.0, result_oo = 0.0, result_ot = 0.0, result_tt = 0.0;
+	initialize_all(chosen_trajectory, particle_to_study);
 
 	//legendre stuff here
 	set_Q_X_k(QXk, k_pts, u_pts);
@@ -498,48 +498,56 @@ inline void set_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 
 	set_T_XY();
 
-	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
-	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+	//start out with mean values w.o. fluctuations
+	complex<double> SV_ss = N_00_ss / N_00_00, SV_oo = N_00_oo / N_00_00, SV_ot = N_00_ot / N_00_00, SV_tt = N_00_tt / N_00_00;
+	cout << "results(BEFORE): " << SV_ss << "   " << SV_oo << "   " << SV_ot << "   " << SV_tt << endl;
+
+	if (include_self_correlations)
+	{
+		for (int iX = 0; iX < 3; ++iX)
+		for (int iY = 0; iY < 3; ++iY)
+		for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+		for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
+		{
+			double k1 = k_pts[ik1];
+			double k2 = k_pts[ik2];
+			complex<double> transport_weight_factor = k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)*Tarray[iX][iY][ik1][ik2];
+			for (int iu = 0; iu < n_u_pts; ++iu)
+			{
+				double u_loc = u_pts[iu];
+				complex<double> QXY_weight_factor = u_wts[iu] * QXk[iX][ik1][iu] * QXk[iY][ik2][iu]
+													/ sqrt(u_loc*u_loc - 1.0);
+				SV_ss += transport_weight_factor * QXY_weight_factor * theta_0_ss_XY[iX][iY][iu];
+				SV_oo += transport_weight_factor * QXY_weight_factor * theta_0_oo_XY[iX][iY][iu];
+				SV_ot += transport_weight_factor * QXY_weight_factor * theta_0_ot_XY[iX][iY][iu];
+				SV_tt += transport_weight_factor * QXY_weight_factor * theta_0_tt_XY[iX][iY][iu];
+			}
+		}
+	}
+	cout << "results(BETWEEN): " << SV_ss << "   " << SV_oo << "   " << SV_ot << "   " << SV_tt << endl;
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iY = 0; iY < 3; ++iY)
+	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
+	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
 		double k1 = k_pts[ik1];
 		double k2 = k_pts[ik2];
-		for (int iu = 0; iu < n_u_pts; ++iu)
-		{
-			result_ss += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
-						*theta_0_ss_XY[iX][iY][iu];
-			result_oo += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
-						*theta_0_oo_XY[iX][iY][iu];
-			result_ot += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
-						*theta_0_ot_XY[iX][iY][iu];
-			result_tt += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu]*QXk[iY][ik2][iu]
-						*theta_0_tt_XY[iX][iY][iu];
-//if (abs(Tarray[iX][iY][ik1][ik2]) > 1.e-10)
-//	cout << "line 1: " << iX << "   " << iY<< "   " << ik1 << "   " << ik2 << "   " << Tarray[iX][iY][ik1][ik2] << "   " << iu << "   " << theta0XY[iX][iY][iu] << endl;
-		}
+		complex<double> transport_weight_factor = k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)*Tarray[iX][iY][ik1][ik2];
 		for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
 		for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
 		{
-			result_ss += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
-						*theta_1_ss_XY[iX][iY][iu1][iu2];
-			result_oo += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
-						*theta_1_oo_XY[iX][iY][iu1][iu2];
-			result_ot += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
-						*theta_1_ot_XY[iX][iY][iu1][iu2];
-			result_tt += k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)
-						*Tarray[iX][iY][ik1][ik2]*QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
-						*theta_1_tt_XY[iX][iY][iu1][iu2];
-//cout << "line 2: " << iu1 << "   " << iu2 << "   " << theta1XY[iX][iY][iu1][iu2] << endl;
+			double u1_loc = u_pts[iu1];
+			double u2_loc = u_pts[iu2];
+			complex<double> QXY_weight_factor = u_wts[iu1] * u_wts[iu2] * QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
+												/ sqrt( (u1_loc*u1_loc - 1.0) * (u2_loc*u2_loc - 1.0) );
+			SV_ss += transport_weight_factor * QXY_weight_factor * theta_1_ss_XY[iX][iY][iu1][iu2];
+			SV_oo += transport_weight_factor * QXY_weight_factor * theta_1_oo_XY[iX][iY][iu1][iu2];
+			SV_ot += transport_weight_factor * QXY_weight_factor * theta_1_ot_XY[iX][iY][iu1][iu2];
+			SV_tt += transport_weight_factor * QXY_weight_factor * theta_1_tt_XY[iX][iY][iu1][iu2];
 		}
 	}
+
+	cout << "results(AFTER): " << SV_ss << "   " << SV_oo << "   " << SV_ot << "   " << SV_tt << endl;
 
 	return;
 }

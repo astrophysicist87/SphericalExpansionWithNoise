@@ -72,11 +72,11 @@ inline void set_N_00_ij()
 //smearing functions here
 inline void set_theta_0_ij_XY()
 {
-	if (1)
+	/*if (1)
 	{
 		cerr << "This function not finished!  E.g., u-integral needs proper integration measure, etc.!!" << endl;
 		exit(1);
-	}
+	}*/
 
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iY = 0; iY < 3; ++iY)
@@ -98,11 +98,11 @@ inline void set_theta_0_ij_XY()
 
 inline void set_theta_1_ij_XY()
 {
-	if (1)
+	/*if (1)
 	{
 		cerr << "This function not finished!  E.g., u-integral needs proper integration measure, etc.!!" << endl;
 		exit(1);
-	}
+	}*/
 
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iYp = 0; iYp < 3; ++iYp)

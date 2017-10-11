@@ -143,6 +143,8 @@ inline void set_d_Phi_ij_dX_dYp_grids()
 
 inline void set_integrated_d_Phi_ij_dX_grids()
 {
+//CHECKED
+//(n_u_pts, u_infinity) = (100, 100) gives ~10^-4 accuracy or better
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	{
@@ -162,6 +164,8 @@ inline void set_integrated_d_Phi_ij_dX_grids()
 
 inline void set_integrated_d_Phi_ij_dX_dY_grids()
 {
+//CHECKED
+//(n_u_pts, u_infinity) = (100, 100) gives ~10^-4 accuracy or better
 	for (int iX = 0; iX < 3; ++iX)
 	for (int iY = 0; iY < 3; ++iY)
 	for (int iu = 0; iu < n_u_pts; ++iu)
