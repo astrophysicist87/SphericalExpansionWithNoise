@@ -14,7 +14,8 @@ HBT_and_emission_density.h \
 Phi_functions_and_derivatives.h \
 Psi_functions_and_derivatives.h \
 lib.h \
-legendre.h
+legendre.h \
+Stopwatch.h
 
 MAKEFILE=makefile
 
@@ -23,7 +24,8 @@ COMMAND=run.e
 OBJS= $(addsuffix .o, $(basename $(SRCS)))
 
 CC= g++
-CFLAGS=  -pg -g -O3
+#CFLAGS=  -pg -g -O3
+CFLAGS=  -g -O3
 WARNFLAGS= -ansi -pedantic -Wall -W \
    -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align \
    -Wwrite-strings -fshort-enums -fno-common 

@@ -19,6 +19,7 @@ using namespace std;
 #include "defs1.h"
 #include "legendre.h"
 #include "HBT_and_emission_density.h"
+#include "Stopwatch.h"
 
 inline int indexer(int ik, int it1, int it2)
 {
@@ -222,31 +223,69 @@ inline complex<double> F_21_11(int ik1)
 //inline complex<double> F_22_11(int ik1, int ik2)
 inline void set_F_22_11_pts()
 {
+	Stopwatch sw3;
+
+	/////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////
+	//define everything in cache first...
+	double x_pts_local[n_x_pts], x_wts_local[n_x_pts], transport_pts_local[n_x_pts];
+	for (int itpp = 0; itpp < n_x_pts; ++itpp)
+	{
+		x_pts_local[itpp] = x_pts[itpp];
+		x_wts_local[itpp] = x_wts[itpp];
+		transport_pts_local[itpp] = transport_pts[itpp];
+	}
+
+	double all_tau_pts_local[2*n_tau_pts], all_tau_wts_local[2*n_tau_pts];
+	for (int itp = 0; itp < 2*n_tau_pts; ++itp)
+	{
+		all_tau_pts_local[itp] = all_tau_pts[itp];
+		all_tau_wts_local[itp] = all_tau_wts[itp];
+	}
+	//reshape A2_pts vector
+	/*for (int ik = 0; ik < n_k_pts; ++ik)
+	for (int it1p = 0; it1p < 2*n_tau_pts; ++it1p)
+	for (int it2p = 0; it2p < 2*n_tau_pts; ++it2p)
+	{
+	}*/
+	/////////////////////////////////////////////////////////
+	/////////////////////////////////////////////////////////
+
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
 	for (int ik2 = 0; ik2 < n_k_pts; ++ik2)
 	{
+		//sw3.Start();
 		//tau1==tau2==tauf
 		complex<double> sum = 0.0;
+
 		for (int it1p = 0; it1p < 2*n_tau_pts; ++it1p)
-		for (int it2p = 0; it2p < 2*n_tau_pts; ++it2p)
+		//for (int it2p = 0; it2p < 2*n_tau_pts; ++it2p)
+		for (int it2p = 0; it2p <= it1p; ++it2p)
 		{
-			double tau1p = all_tau_pts[it1p];
-			double tau2p = all_tau_pts[it2p];
-			double min_t1_t2 = min(tau1p, tau2p);
+			double avoid_double_counting = 2.0 / ( 1.0 + double( it1p == it2p ) );
+			double tau1p = all_tau_pts_local[it1p];
+			double tau2p = all_tau_pts_local[it2p];
+			//double min_t1_t2 = min(tau1p, tau2p);
+			double min_t1_t2 = tau2p;
 			double hw = 0.5 * (min_t1_t2 - tau0);
 			double cen = 0.5 * (min_t1_t2 + tau0);
-			//complex<double> tmpA2_k1 = A2_pts[ik1][it1p][it2p];
-			//complex<double> tmpA2_k2 = A2_pts[ik2][it1p][it2p];
+
 			complex<double> tmpA2_k1 = A2_pts[indexer(ik1,it1p,it2p)];
-			complex<double> tmpA2_k2 = A2_pts[indexer(ik1,it1p,it2p)];
+			complex<double> tmpA2_k2 = A2_pts[indexer(ik2,it1p,it2p)];
+
 			for (int itpp = 0; itpp < n_x_pts; ++itpp)
 			{
-				double taupp = cen + hw * x_pts[itpp];
-				sum += hw * x_wts[itpp] * all_tau_wts[it1p] * all_tau_wts[it2p] * transport_pts[itpp]
-						* tmpA2_k1 * tmpA2_k2 / (tau1p*tau1p*tau2p*tau2p*pow(taupp, 5.0));
+				double taupp = cen + hw * x_pts_local[itpp];
+				double taupp5 = taupp*taupp*taupp*taupp*taupp;
+				sum += avoid_double_counting * hw * x_wts_local[itpp] * all_tau_wts_local[it1p] * all_tau_wts_local[it2p] * transport_pts_local[itpp]
+						* tmpA2_k1 * tmpA2_k2 / (tau1p*tau1p*tau2p*tau2p*taupp5);
 			}
 		}
+
+		//sw3.Stop();
+		//cout << "Finished loop = (" << ik1 << "," << ik2 << ") in " << sw3.printTime() << " sec." << endl;
 		F_22_11_pts[ik1][ik2] = sum;
+		//sw3.Reset();
 	}
 	return;
 }
@@ -420,15 +459,46 @@ inline void set_T_23()
 
 inline void set_T_XY()
 {
+	Stopwatch sw2;
+
+	sw2.Start();
 	//set diagonals
 	set_T_11();
+	sw2.Stop();
+	cout << "Checkpoint #1 in " << sw2.printTime() << " sec." << endl;
+
+	sw2.Reset();
+	sw2.Start();
 	set_T_22();
+	sw2.Stop();
+	cout << "Checkpoint #2 in " << sw2.printTime() << " sec." << endl;
+
+	sw2.Reset();
+	sw2.Start();
 	set_T_33();
+	sw2.Stop();
+	cout << "Checkpoint #3 in " << sw2.printTime() << " sec." << endl;
+
 
 	//set off-diagonals
+	sw2.Reset();
+	sw2.Start();
 	set_T_12();
+	sw2.Stop();
+	cout << "Checkpoint #4 in " << sw2.printTime() << " sec." << endl;
+
+	sw2.Reset();
+	sw2.Start();
 	set_T_13();
+	sw2.Stop();
+	cout << "Checkpoint #5 in " << sw2.printTime() << " sec." << endl;
+
+	sw2.Reset();
+	sw2.Start();
 	set_T_23();
+	sw2.Stop();
+	cout << "Checkpoint #6 in " << sw2.printTime() << " sec." << endl;
+
 
 	//use symmetry to set the rest
 	for (int ik1 = 0; ik1 < n_k_pts; ++ik1)
@@ -444,15 +514,25 @@ inline void set_T_XY()
 
 inline void set_everything_else()
 {
+	//Stopwatch sw_SEE;
 	//transport related functions here...
+	//sw_SEE.Start();
 	set_G3_and_tauDtau_G3_matrices();
 	set_G3_and_tauDtau_G3_matrices_at_tauf();
+	//sw_SEE.Stop();
+	//cout << "Checkpoint #1 in " << sw_SEE.printTime() << " sec." << endl;
 
+	//sw_SEE.Reset();
+	//sw_SEE.Start();
 	set_A1_pts();
 	set_A2_pts();
 	set_B_pts();
 	set_C_pts();
+	//sw_SEE.Stop();
+	//cout << "Checkpoint #2 in " << sw_SEE.printTime() << " sec." << endl;
 
+	//sw_SEE.Reset();
+	//sw_SEE.Start();
 	//HBT related functions here...
 	//set earliest stuff first
 	set_PsiA();
@@ -461,12 +541,20 @@ inline void set_everything_else()
 	set_PsiBk();
 	set_PsiBk_first_derivatives_vector();
 	set_PsiBk_second_derivatives_array();
+	//sw_SEE.Stop();
+	//cout << "Checkpoint #3 in " << sw_SEE.printTime() << " sec." << endl;
 
+	//sw_SEE.Reset();
+	//sw_SEE.Start();
 	//next layer of dependence
 	set_Psi_k();
 	set_dPsik_dX();
 	set_dPsik_dX_dY();
+	//sw_SEE.Stop();
+	//cout << "Checkpoint #4 in " << sw_SEE.printTime() << " sec." << endl;
 
+	//sw_SEE.Reset();
+	//sw_SEE.Start();
 	//next layer
 	set_Phi_ij_grids();
 	set_d_Phi_ij_dX_grids();
@@ -475,28 +563,55 @@ inline void set_everything_else()
 	set_integrated_d_Phi_ij_dX_grids();
 	set_integrated_d_Phi_ij_dX_dY_grids();
 	set_N_00_ij();
+	//sw_SEE.Stop();
+	//cout << "Checkpoint #5 in " << sw_SEE.printTime() << " sec." << endl;
 
+	//sw_SEE.Reset();
+	//sw_SEE.Start();
 	//final layer
 	set_theta_0_ij_XY();
 	set_theta_1_ij_XY();
+	//sw_SEE.Stop();
+	//cout << "Checkpoint #6 in " << sw_SEE.printTime() << " sec." << endl;
 
 	return;
 }
 
 inline void set_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 {
-	bool include_self_correlations = false;
+	Stopwatch sw;
+	bool include_self_correlations = true;
 
+	sw.Start();
 	initialize_all(chosen_trajectory, particle_to_study);
+	sw.Stop();
+	cout << "Initialized in " << sw.printTime() << " sec." << endl;
 
 	//legendre stuff here
+	sw.Reset();
+	sw.Start();
 	set_Q_X_k(QXk, k_pts, u_pts);
+	sw.Stop();
+	cout << "Set Q_X_k in " << sw.printTime() << " sec." << endl;
+
+	sw.Reset();
+	sw.Start();
 	compute_legendre_integral(legendre_integral_array, k_pts);
+	sw.Stop();
+	cout << "Computed legendre integral in " << sw.printTime() << " sec." << endl;
 
 	//set other stuff here
+	sw.Reset();
+	sw.Start();
 	set_everything_else();
+	sw.Stop();
+	cout << "Set everything else in " << sw.printTime() << " sec." << endl;
 
+	sw.Reset();
+	sw.Start();
 	set_T_XY();
+	sw.Stop();
+	cout << "Set T_XY in " << sw.printTime() << " sec." << endl;
 
 	//start out with mean values w.o. fluctuations
 	complex<double> SV_ss = N_00_ss / N_00_00, SV_oo = N_00_oo / N_00_00, SV_ot = N_00_ot / N_00_00, SV_tt = N_00_tt / N_00_00;
@@ -514,13 +629,14 @@ inline void set_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 			complex<double> transport_weight_factor = k_wts[ik1]*k_wts[ik2]*k1*k2*tanh(M_PI*k1)*tanh(M_PI*k2)*Tarray[iX][iY][ik1][ik2];
 			for (int iu = 0; iu < n_u_pts; ++iu)
 			{
+				int index3D = indexer3D(iX, iY, iu, 3, 3, n_u_pts);
 				double u_loc = u_pts[iu];
 				complex<double> QXY_weight_factor = u_wts[iu] * QXk[iX][ik1][iu] * QXk[iY][ik2][iu]
 													/ sqrt(u_loc*u_loc - 1.0);
-				SV_ss += transport_weight_factor * QXY_weight_factor * theta_0_ss_XY[iX][iY][iu];
-				SV_oo += transport_weight_factor * QXY_weight_factor * theta_0_oo_XY[iX][iY][iu];
-				SV_ot += transport_weight_factor * QXY_weight_factor * theta_0_ot_XY[iX][iY][iu];
-				SV_tt += transport_weight_factor * QXY_weight_factor * theta_0_tt_XY[iX][iY][iu];
+				SV_ss += transport_weight_factor * QXY_weight_factor * theta_0_ss_XY[index3D];
+				SV_oo += transport_weight_factor * QXY_weight_factor * theta_0_oo_XY[index3D];
+				SV_ot += transport_weight_factor * QXY_weight_factor * theta_0_ot_XY[index3D];
+				SV_tt += transport_weight_factor * QXY_weight_factor * theta_0_tt_XY[index3D];
 			}
 		}
 	}
@@ -536,14 +652,15 @@ inline void set_mean_delta_R2ij(int chosen_trajectory, int particle_to_study)
 		for (int iu1 = 0; iu1 < n_u_pts; ++iu1)
 		for (int iu2 = 0; iu2 < n_u_pts; ++iu2)
 		{
+			int index4D = indexer4D(iX, iY, iu1, iu2, 3, 3, n_u_pts, n_u_pts);
 			double u1_loc = u_pts[iu1];
 			double u2_loc = u_pts[iu2];
 			complex<double> QXY_weight_factor = u_wts[iu1] * u_wts[iu2] * QXk[iX][ik1][iu1]*QXk[iY][ik2][iu2]
 												/ sqrt( (u1_loc*u1_loc - 1.0) * (u2_loc*u2_loc - 1.0) );
-			SV_ss += transport_weight_factor * QXY_weight_factor * theta_1_ss_XY[iX][iY][iu1][iu2];
-			SV_oo += transport_weight_factor * QXY_weight_factor * theta_1_oo_XY[iX][iY][iu1][iu2];
-			SV_ot += transport_weight_factor * QXY_weight_factor * theta_1_ot_XY[iX][iY][iu1][iu2];
-			SV_tt += transport_weight_factor * QXY_weight_factor * theta_1_tt_XY[iX][iY][iu1][iu2];
+			SV_ss += transport_weight_factor * QXY_weight_factor * theta_1_ss_XY[index4D];
+			SV_oo += transport_weight_factor * QXY_weight_factor * theta_1_oo_XY[index4D];
+			SV_ot += transport_weight_factor * QXY_weight_factor * theta_1_ot_XY[index4D];
+			SV_tt += transport_weight_factor * QXY_weight_factor * theta_1_tt_XY[index4D];
 		}
 	}
 

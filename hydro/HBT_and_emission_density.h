@@ -52,14 +52,15 @@ inline void set_N_00_ij()
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
+		int index2D = indexer2D(iu, iup, n_u_pts, n_u_pts);
 		double u_loc = u_pts[iu];
 		double up_loc = u_pts[iup];
 		double measure = 1.0 / sqrt( (u_loc*u_loc-1.0) * (up_loc*up_loc-1.0) );	//for proper u-integration
-		N_00_00 += u_wts[iu] * u_wts[iup] * measure * Phi_0_0[iu][iup];
-		N_00_ss += u_wts[iu] * u_wts[iup] * measure * Phi_s_s[iu][iup];
-		N_00_oo += u_wts[iu] * u_wts[iup] * measure * Phi_o_o[iu][iup];
-		N_00_ot += u_wts[iu] * u_wts[iup] * measure * Phi_o_t[iu][iup];
-		N_00_tt += u_wts[iu] * u_wts[iup] * measure * Phi_t_t[iu][iup];
+		N_00_00 += u_wts[iu] * u_wts[iup] * measure * Phi_0_0[index2D];
+		N_00_ss += u_wts[iu] * u_wts[iup] * measure * Phi_s_s[index2D];
+		N_00_oo += u_wts[iu] * u_wts[iup] * measure * Phi_o_o[index2D];
+		N_00_ot += u_wts[iu] * u_wts[iup] * measure * Phi_o_t[index2D];
+		N_00_tt += u_wts[iu] * u_wts[iup] * measure * Phi_t_t[index2D];
 	}
 
 	return;
@@ -82,14 +83,15 @@ inline void set_theta_0_ij_XY()
 	for (int iY = 0; iY < 3; ++iY)
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	{
-		theta_0_ss_XY[iX][iY][iu] = int_dup_d_Phi_s_s_dX_dY[iX][iY][iu] / N_00_00
-									- (N_00_ss / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[iX][iY][iu];
-		theta_0_oo_XY[iX][iY][iu] = int_dup_d_Phi_o_o_dX_dY[iX][iY][iu] / N_00_00
-									- (N_00_oo / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[iX][iY][iu];
-		theta_0_ot_XY[iX][iY][iu] = int_dup_d_Phi_o_t_dX_dY[iX][iY][iu] / N_00_00
-									- (N_00_ot / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[iX][iY][iu];
-		theta_0_tt_XY[iX][iY][iu] = int_dup_d_Phi_t_t_dX_dY[iX][iY][iu] / N_00_00
-									- (N_00_tt / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[iX][iY][iu];
+		int index3D = indexer3D(iX, iY, iu, 3, 3, n_u_pts);
+		theta_0_ss_XY[index3D] = int_dup_d_Phi_s_s_dX_dY[index3D] / N_00_00
+									- (N_00_ss / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[index3D];
+		theta_0_oo_XY[index3D] = int_dup_d_Phi_o_o_dX_dY[index3D] / N_00_00
+									- (N_00_oo / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[index3D];
+		theta_0_ot_XY[index3D] = int_dup_d_Phi_o_t_dX_dY[index3D] / N_00_00
+									- (N_00_ot / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[index3D];
+		theta_0_tt_XY[index3D] = int_dup_d_Phi_t_t_dX_dY[index3D] / N_00_00
+									- (N_00_tt / ( N_00_00*N_00_00 )) * int_dup_d_Phi_0_0_dX_dY[index3D];
 	}
 
 	return;
@@ -109,33 +111,36 @@ inline void set_theta_1_ij_XY()
 	for (int iu = 0; iu < n_u_pts; ++iu)
 	for (int iup = 0; iup < n_u_pts; ++iup)
 	{
-		theta_1_ss_XY[iX][iYp][iu][iup] = d_Phi_s_s_dX_dY[iX][iYp][iu][iup] / N_00_00
-										- (N_00_ss / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[iX][iYp][iu][iup]
-										- 4.0 * ( int_dup_d_Phi_0_0_dX[iX][iu] / ( N_00_00*N_00_00 ) )
+		int index2Da = indexer2D(iX, iu, 3, n_u_pts);
+		int index2Db = indexer2D(iYp, iup, 3, n_u_pts);
+		int index4D = indexer4D(iX, iYp, iu, iup, 3, 3, n_u_pts, n_u_pts);
+		theta_1_ss_XY[index4D] = d_Phi_s_s_dX_dY[index4D] / N_00_00
+										- (N_00_ss / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[index4D]
+										- 4.0 * ( int_dup_d_Phi_0_0_dX[index2Da] / ( N_00_00*N_00_00 ) )
 										* (
-											int_dup_d_Phi_s_s_dX[iYp][iup]
-												 - ( N_00_ss / N_00_00 ) * int_dup_d_Phi_0_0_dX[iYp][iup]
+											int_dup_d_Phi_s_s_dX[index2Db]
+												 - ( N_00_ss / N_00_00 ) * int_dup_d_Phi_0_0_dX[index2Db]
 											);
-		theta_1_oo_XY[iX][iYp][iu][iup] = d_Phi_o_o_dX_dY[iX][iYp][iu][iup] / N_00_00
-										- (N_00_oo / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[iX][iYp][iu][iup]
-										- 4.0 * ( int_dup_d_Phi_0_0_dX[iX][iu] / ( N_00_00*N_00_00 ) )
+		theta_1_oo_XY[index4D] = d_Phi_o_o_dX_dY[index4D] / N_00_00
+										- (N_00_oo / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[index4D]
+										- 4.0 * ( int_dup_d_Phi_0_0_dX[index2Da] / ( N_00_00*N_00_00 ) )
 										* (
-											int_dup_d_Phi_o_o_dX[iYp][iup]
-												 - ( N_00_oo / N_00_00 ) * int_dup_d_Phi_0_0_dX[iYp][iup]
+											int_dup_d_Phi_o_o_dX[index2Db]
+												 - ( N_00_oo / N_00_00 ) * int_dup_d_Phi_0_0_dX[index2Db]
 											);
-		theta_1_ot_XY[iX][iYp][iu][iup] = d_Phi_o_t_dX_dY[iX][iYp][iu][iup] / N_00_00
-										- (N_00_ot / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[iX][iYp][iu][iup]
-										- 4.0 * ( int_dup_d_Phi_0_0_dX[iX][iu] / ( N_00_00*N_00_00 ) )
+		theta_1_ot_XY[index4D] = d_Phi_o_t_dX_dY[index4D] / N_00_00
+										- (N_00_ot / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[index4D]
+										- 4.0 * ( int_dup_d_Phi_0_0_dX[index2Da] / ( N_00_00*N_00_00 ) )
 										* (
-											int_dup_d_Phi_o_t_dX[iYp][iup]
-												 - ( N_00_ot / N_00_00 ) * int_dup_d_Phi_0_0_dX[iYp][iup]
+											int_dup_d_Phi_o_t_dX[index2Db]
+												 - ( N_00_ot / N_00_00 ) * int_dup_d_Phi_0_0_dX[index2Db]
 											);
-		theta_1_tt_XY[iX][iYp][iu][iup] = d_Phi_t_t_dX_dY[iX][iYp][iu][iup] / N_00_00
-										- (N_00_tt / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[iX][iYp][iu][iup]
-										- 4.0 * ( int_dup_d_Phi_0_0_dX[iX][iu] / ( N_00_00*N_00_00 ) )
+		theta_1_tt_XY[index4D] = d_Phi_t_t_dX_dY[index4D] / N_00_00
+										- (N_00_tt / ( N_00_00*N_00_00 )) * d_Phi_0_0_dX_dY[index4D]
+										- 4.0 * ( int_dup_d_Phi_0_0_dX[index2Da] / ( N_00_00*N_00_00 ) )
 										* (
-											int_dup_d_Phi_t_t_dX[iYp][iup]
-												 - ( N_00_tt / N_00_00 ) * int_dup_d_Phi_0_0_dX[iYp][iup]
+											int_dup_d_Phi_t_t_dX[index2Db]
+												 - ( N_00_tt / N_00_00 ) * int_dup_d_Phi_0_0_dX[index2Db]
 											);
 	}
 

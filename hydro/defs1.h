@@ -71,7 +71,7 @@ vector<double> T_pts_upper, mu_pts_upper;
 vector<double> all_T_pts, all_mu_pts;
 vector<double> Delta_lambda_pts, vn2_pts, vs2_pts, vsigma2_pts, n_Tmu_pts, s_Tmu_pts, w_Tmu_pts;
 
-/*vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
+vector<vector<vector<complex<double> > > > G3_tau_taup, tauDtau_G3_tau_taup;
 vector<vector<complex<double> > > G3_tauf_taup, tauDtau_G3_tauf_taup;
 vector<double> transport_pts;
 vector<double> A1_pts;
@@ -82,8 +82,9 @@ vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
 vector<vector<complex<double> > > F_22_11_pts, F_2_12_pts, F_2_13_pts;
 
 vector<vector<vector<vector<complex<double> > > > > Tarray;
-vector<vector<double> > legendre_integral_array;*/
-vector<complex<double> > G3_tau_taup, tauDtau_G3_tau_taup;
+vector<vector<double> > legendre_integral_array;
+
+/*vector<complex<double> > G3_tau_taup, tauDtau_G3_tau_taup;
 vector<complex<double> > G3_tauf_taup, tauDtau_G3_tauf_taup;
 vector<double> transport_pts;
 vector<double> A1_pts;
@@ -94,7 +95,7 @@ vector<complex<double> > F_1_12_pts, F_1_13_pts, F_12_11_pts, F_21_11_pts;
 vector<complex<double> > F_22_11_pts, F_2_12_pts, F_2_13_pts;
 
 vector<complex<double> > Tarray;
-vector<double> legendre_integral_array;
+vector<double> legendre_integral_array;*/
 
 
 //////////////////////////////////////////////////////////
@@ -106,20 +107,23 @@ double
 vector<double>
 	Psi0, Psi1, Psi2, PsiA, PsiB0, PsiB1, PsiB2;
 //2D
-vector<vector<double> >
+//vector<vector<double> >
+vector<double>
 	dPsiA_dX, dPsi0_dX, dPsi1_dX, dPsi2_dX, dPsiB0_dX, dPsiB1_dX, dPsiB2_dX,
 	Phi_0_0, Phi_s_s, Phi_o_o, Phi_o_t, Phi_t_t,
 	int_dup_d_Phi_0_0_dX, int_dup_d_Phi_s_s_dX, int_dup_d_Phi_o_o_dX, int_dup_d_Phi_o_t_dX,
 	int_dup_d_Phi_t_t_dX;
 //3D
-vector<vector<vector<double> > >
+//vector<vector<vector<double> > >
+vector<double>
 	dPsiA_dX_dY, dPsiB0_dX_dY, dPsiB1_dX_dY, dPsiB2_dX_dY, dPsi0_dX_dY, dPsi1_dX_dY, dPsi2_dX_dY,
 	d_Phi_0_0_dX, d_Phi_s_s_dX, d_Phi_o_o_dX, d_Phi_o_t_dX, d_Phi_t_t_dX,
 	int_dup_d_Phi_0_0_dX_dY, int_dup_d_Phi_s_s_dX_dY, int_dup_d_Phi_o_o_dX_dY,
 	int_dup_d_Phi_o_t_dX_dY, int_dup_d_Phi_t_t_dX_dY,
 	theta_0_ss_XY, theta_0_oo_XY, theta_0_ot_XY, theta_0_tt_XY;
 //4D
-vector<vector<vector<vector<double> > > >
+//vector<vector<vector<vector<double> > > >
+vector<double>
 	d_Phi_0_0_dX_dY, d_Phi_s_s_dX_dY, d_Phi_o_o_dX_dY, d_Phi_o_t_dX_dY, d_Phi_t_t_dX_dY,
 	d_Phi_0_0_dX_dYp, d_Phi_s_s_dX_dYp, d_Phi_o_o_dX_dYp, d_Phi_o_t_dX_dYp, d_Phi_t_t_dX_dYp,
 	theta_1_ss_XY, theta_1_oo_XY, theta_1_ot_XY, theta_1_tt_XY;
@@ -807,6 +811,7 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	PsiB1 = vector<double>(n_u_pts);
 	PsiB2 = vector<double>(n_u_pts);
 	//
+/*
 	//2D
 	create_matrix_2D(&dPsiA_dX, 3, n_u_pts);
 	create_matrix_2D(&dPsi0_dX, 3, n_u_pts);
@@ -871,6 +876,71 @@ inline void initialize_all(int chosen_trajectory, int particle_to_study)
 	create_matrix_4D(&theta_1_oo_XY, 3, 3, n_u_pts, n_u_pts);
 	create_matrix_4D(&theta_1_ot_XY, 3, 3, n_u_pts, n_u_pts);
 	create_matrix_4D(&theta_1_tt_XY, 3, 3, n_u_pts, n_u_pts);
+*/
+	//2D
+	dPsiA_dX = vector<double>(3 * n_u_pts);
+	dPsi0_dX = vector<double>(3 * n_u_pts);
+	dPsi1_dX = vector<double>(3 * n_u_pts);
+	dPsi2_dX = vector<double>(3 * n_u_pts);
+	dPsiB0_dX = vector<double>(3 * n_u_pts);
+	dPsiB1_dX = vector<double>(3 * n_u_pts);
+	dPsiB2_dX = vector<double>(3 * n_u_pts);
+	//
+	Phi_0_0 = vector<double>(n_u_pts * n_u_pts);
+	Phi_s_s = vector<double>(n_u_pts * n_u_pts);
+	Phi_o_o = vector<double>(n_u_pts * n_u_pts);
+	Phi_o_t = vector<double>(n_u_pts * n_u_pts);
+	Phi_t_t = vector<double>(n_u_pts * n_u_pts);
+	//
+	int_dup_d_Phi_0_0_dX = vector<double>(n_u_pts * n_u_pts);
+	int_dup_d_Phi_s_s_dX = vector<double>(n_u_pts * n_u_pts);
+	int_dup_d_Phi_o_o_dX = vector<double>(n_u_pts * n_u_pts);
+	int_dup_d_Phi_o_t_dX = vector<double>(n_u_pts * n_u_pts);
+	int_dup_d_Phi_t_t_dX = vector<double>(n_u_pts * n_u_pts);
+	//
+	//3D
+	dPsiA_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	dPsiB0_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	dPsiB1_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	dPsiB2_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	dPsi0_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	dPsi1_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	dPsi2_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	//
+	d_Phi_0_0_dX = vector<double>(3 * n_u_pts * n_u_pts);
+	d_Phi_s_s_dX = vector<double>(3 * n_u_pts * n_u_pts);
+	d_Phi_o_o_dX = vector<double>(3 * n_u_pts * n_u_pts);
+	d_Phi_o_t_dX = vector<double>(3 * n_u_pts * n_u_pts);
+	d_Phi_t_t_dX = vector<double>(3 * n_u_pts * n_u_pts);
+	//
+	int_dup_d_Phi_0_0_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	int_dup_d_Phi_s_s_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	int_dup_d_Phi_o_o_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	int_dup_d_Phi_o_t_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	int_dup_d_Phi_t_t_dX_dY = vector<double>(3 * 3 * n_u_pts);
+	//
+	theta_0_ss_XY = vector<double>(3 * 3 * n_u_pts);
+	theta_0_oo_XY = vector<double>(3 * 3 * n_u_pts);
+	theta_0_ot_XY = vector<double>(3 * 3 * n_u_pts);
+	theta_0_tt_XY = vector<double>(3 * 3 * n_u_pts);
+	//
+	//4D
+	d_Phi_0_0_dX_dY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_s_s_dX_dY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_o_o_dX_dY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_o_t_dX_dY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_t_t_dX_dY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	//
+	d_Phi_0_0_dX_dYp = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_s_s_dX_dYp = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_o_o_dX_dYp = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_o_t_dX_dYp = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	d_Phi_t_t_dX_dYp = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	//
+	theta_1_ss_XY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	theta_1_oo_XY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	theta_1_ot_XY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
+	theta_1_tt_XY = vector<double>(3 * 3 * n_u_pts * n_u_pts);
 	//////////////////////////////////////////////////////////
 	//////////////////////////////////////////////////////////
 

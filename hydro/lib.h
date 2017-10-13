@@ -154,7 +154,7 @@ void create_matrix_4D(
 	}
 	return;
 }
-		( ( ( ( ( ipt * n_pphi_pts + ipphi ) * qtnpts + iqt ) * qxnpts + iqx ) * qynpts + iqy ) * qznpts + iqz ) * 2 + itrig
+		//( ( ( ( ( ipt * n_pphi_pts + ipphi ) * qtnpts + iqt ) * qxnpts + iqx ) * qynpts + iqy ) * qznpts + iqz ) * 2 + itrig
 inline long int indexer2D(int i, int j, int ni, int nj)
 {
 	return (
